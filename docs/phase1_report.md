@@ -27,7 +27,7 @@ Trong lĩnh vực **Tổng hợp chương trình (Program Synthesis)**, hai hư�
 
 | Hướng tiếp cận | Hạn chế cốt lõi |
 |---|---|
-| **Lập trình qua Ví dụ (PBE)** | Buộc người dùng phải tự nghĩ ra các cặp Input-Output đầy đủ, chính xác — một việc đòi hỏi **tải nhận thức (cognitive load) rất cao**, đặc biệt khi bài toán phức tạp hoặc có nhiều trường hợp biên (edge cases). |
+| **Lập trình qua Ví dụ (PBE)** | Buộc người dùng phải tự nghĩ ra các cặp Input-Output đầy đủ, chính xác — một việc đòi hỏi **gánh nặng nhận thức (cognitive load) rất cao**, đặc biệt khi bài toán phức tạp hoặc có nhiều trường hợp biên (edge cases). |
 | **Dùng LLM trực tiếp** | Cho phép mô tả bài toán bằng ngôn ngữ tự nhiên (NL), nhưng do NL vốn **mơ hồ và thiếu hình thức hóa**, LLM dễ sản sinh mã sai hoặc không đúng ý (hiện tượng **ảo giác — hallucination**). |
 
 > **Cognitive Friction Gap** (Khoảng cách ma sát nhận thức) là khoảng trống giữa **ý định thực sự** của người dùng và **khả năng diễn đạt** ý định đó thông qua các giao diện hiện có (ví dụ I/O hoặc prompt NL). Khoảng cách này là nguyên nhân gốc rễ dẫn đến mã sinh ra không khớp với mong muốn.
@@ -205,7 +205,7 @@ SEMSYNTH Lite kế thừa hướng Interactive Clarification nhưng **đổi m�
 
 **Quy trình hoạt động:**
 
-```
+<!-- ```
 Mô tả NL ──► LLM sinh Top-K ứng viên ──► Phân tích sự khác biệt ngữ nghĩa
                                                      │
                                                      ▼
@@ -223,7 +223,9 @@ Mô tả NL ──► LLM sinh Top-K ứng viên ──► Phân tích sự khá
                                               └──────┬──────┘
                                              Yes ──► Lặp lại
                                              No  ──► Trả kết quả
-```
+``` -->
+
+![Pipeline](/image/01.png)
 
 **Ưu điểm so với các phương pháp trước:**
 
