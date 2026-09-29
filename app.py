@@ -1,163 +1,126 @@
-"""
-SEMSYNTH Lite — Web Demo (Streamlit)
-======================================
-Giao diện web tương tác cho hệ thống SEMSYNTH Lite.
+"""Stateful Streamlit demo for SEMSYNTH Lite."""
+from __future__ import annotations
 
-Chạy:
-    streamlit run app.py
-
-Lưu ý: Đây là scaffold cho Phase 1.
-        Giao diện đầy đủ sẽ được xây dựng ở Phase 3.
-"""
-
+import os
 import streamlit as st
 
+from src.candidate_manager import CandidateManager
+from src.code_executor import CodeExecutor
+from src.llm_client import LLMClient, MockLLMClient
+from src.question_generator import QuestionGenerator
 
-# ---------------------------------------------------------------------------
-# Page Config
-# ---------------------------------------------------------------------------
-
-st.set_page_config(
-    page_title="SEMSYNTH Lite",
-    page_icon="🧪",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+st.set_page_config(page_title="SEMSYNTH Lite", page_icon="🧪", layout="wide")
 
 
-# ---------------------------------------------------------------------------
-# Sidebar
-# ---------------------------------------------------------------------------
+def init_state():
+    defaults = {
+        "manager": None,
+        "qgen": None,
+        "current_q": None,
+        "transcript": [],
+        "fn": "",
+        "params": "",
+        "description": "",
+    }
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
+
+
+def next_question():
+    manager = st.session_state.manager
+    qgen = st.session_state.qgen
+    if manager is None or manager.is_converged:
+        st.session_state.current_q = None
+        return
+    st.session_state.current_q = qgen.generate_question(
+        manager.get_active(), st.session_state.fn, st.session_state.description,
+        params=st.session_state.params,
+    )
+
+
+def answer_current(value: bool):
+    q = st.session_state.current_q
+    manager = st.session_state.manager
+    before = manager.active_count
+    removed = manager.filter_by_answer(
+        q.question, value,
+        yes_candidate_ids=q.yes_candidate_ids,
+        no_candidate_ids=q.no_candidate_ids,
+    )
+    st.session_state.transcript.append({
+        "question": q.question,
+        "answer": value,
+        "before": before,
+        "after": manager.active_count,
+        "removed": removed,
+        "balance": q.balance,
+    })
+    next_question()
+
+
+init_state()
+st.title("🧪 SEMSYNTH Lite")
+st.caption("Behavior-guided semantic clarification for Python program synthesis")
 
 with st.sidebar:
-    st.title("🧪 SEMSYNTH Lite")
-    st.caption("Interactive Program Synthesis via Semantic Clarification Questions")
+    mode = st.radio("Mode", ["Offline demo (no API key)", "Real LLM"])
+    provider = st.selectbox("Provider", ["openai", "openrouter"])
+    model = st.text_input("Model", value=os.getenv("DEFAULT_MODEL", "gpt-4o-mini"))
+    top_k = st.slider("Top-K", 2, 8, 5)
+    max_questions = st.slider("Max questions", 1, 6, 4)
+    st.warning("Execution is process-isolated for a research demo, not a hardened multi-tenant sandbox.")
 
-    st.divider()
-
-    st.subheader("⚙️ Cấu hình")
-
-    provider = st.selectbox(
-        "LLM Provider",
-        options=["openai", "openrouter"],
-        index=0,
-    )
-
-    model = st.text_input(
-        "Model",
-        value="gpt-4o-mini",
-    )
-
-    top_k = st.slider(
-        "Số ứng viên (Top-K)",
-        min_value=2,
-        max_value=10,
-        value=5,
-    )
-
-    max_questions = st.slider(
-        "Số câu hỏi tối đa",
-        min_value=1,
-        max_value=8,
-        value=4,
-    )
-
-    st.divider()
-    st.markdown(
-        "📄 [Phase 1 Report](docs/phase1_report.md)  \n"
-        "📊 [Dataset](config/dataset_sample.json)"
-    )
-
-
-# ---------------------------------------------------------------------------
-# Main Content
-# ---------------------------------------------------------------------------
-
-st.title("🧪 SEMSYNTH Lite")
-st.markdown(
-    "**Interactive Program Synthesis via Semantic Clarification Questions**"
+description = st.text_area(
+    "Task description",
+    value="Remove duplicate elements from a list.",
+    height=100,
 )
+c1, c2 = st.columns(2)
+with c1:
+    function_name = st.text_input("Function name", value="remove_duplicates")
+with c2:
+    params = st.text_input("Parameters", value="xs")
 
-st.info(
-    "🚧 **Phase 1 — Scaffold**: Giao diện này đang trong quá trình phát triển. "
-    "Chức năng tương tác đầy đủ sẽ có ở Phase 3.",
-    icon="ℹ️",
-)
+if st.button("Generate candidates", type="primary"):
+    try:
+        llm = MockLLMClient() if mode.startswith("Offline") else LLMClient(provider=provider, model=model)
+        executor = CodeExecutor(timeout=5)
+        manager = CandidateManager(executor)
+        codes = llm.generate_multiple(description, function_name, params, k=top_k)
+        manager.add_candidates(list(dict.fromkeys(codes)))
+        st.session_state.manager = manager
+        st.session_state.qgen = QuestionGenerator(executor, max_questions=max_questions, max_probe_inputs=12)
+        st.session_state.transcript = []
+        st.session_state.fn = function_name
+        st.session_state.params = params
+        st.session_state.description = description
+        next_question()
+    except Exception as exc:
+        st.error(f"Could not start synthesis: {type(exc).__name__}: {exc}")
 
-# Tab layout
-tab_synth, tab_baseline, tab_about = st.tabs([
-    "🔬 SEMSYNTH (Interactive)",
-    "📊 Baseline CoT",
-    "ℹ️ About",
-])
+manager = st.session_state.manager
+if manager is not None:
+    st.metric("Active candidates", f"{manager.active_count}/{manager.total_count}")
+    q = st.session_state.current_q
+    if q is not None:
+        st.subheader("Clarification")
+        st.write(q.question)
+        st.caption(f"Balanced split score: {q.balance:.3f} · information gain: {q.info_gain:.3f}")
+        a, b = st.columns(2)
+        a.button("Yes", on_click=answer_current, args=(True,), use_container_width=True)
+        b.button("No", on_click=answer_current, args=(False,), use_container_width=True)
+    else:
+        st.success("No further distinguishing question is available, or the candidates have converged.")
 
-# --- Tab 1: SEMSYNTH Interactive ---
-with tab_synth:
-    st.subheader("Mô tả bài toán")
-    description = st.text_area(
-        "Nhập mô tả bài toán bằng ngôn ngữ tự nhiên (tiếng Anh):",
-        placeholder="Example: Write a function that removes duplicate elements "
-                    "from a list while preserving the original order.",
-        height=120,
-    )
+    best = manager.get_best()
+    if best:
+        st.subheader("Current best candidate")
+        st.code(best.code, language="python")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        function_name = st.text_input(
-            "Tên hàm:",
-            placeholder="remove_duplicates",
-        )
-    with col2:
-        params = st.text_input(
-            "Tham số:",
-            placeholder="lst",
-        )
+    if st.session_state.transcript:
+        st.subheader("Session log")
+        st.dataframe(st.session_state.transcript, use_container_width=True)
 
-    if st.button("🚀 Bắt đầu tổng hợp", type="primary", use_container_width=True):
-        st.warning("⚠️ Chức năng này sẽ được hiện thực ở Phase 2–3.")
-
-    st.divider()
-    st.subheader("💬 Câu hỏi làm rõ")
-    st.caption("Hệ thống sẽ đặt câu hỏi Đúng/Sai tại đây để thu hẹp ứng viên.")
-
-    # Placeholder cho Q&A
-    with st.container(border=True):
-        st.markdown("*Chưa có câu hỏi. Hãy bắt đầu tổng hợp ở trên.*")
-
-# --- Tab 2: Baseline CoT ---
-with tab_baseline:
-    st.subheader("📊 Thí nghiệm Baseline CoT")
-    st.markdown(
-        "Chạy Baseline CoT (0-interaction) trên tập dataset 15 bài toán "
-        "để thu thập kết quả đối chứng."
-    )
-
-    if st.button("▶️ Chạy Baseline CoT", use_container_width=True):
-        st.warning("⚠️ Chức năng này sẽ được tích hợp ở Phase 2–3.")
-
-# --- Tab 3: About ---
-with tab_about:
-    st.subheader("ℹ️ Về SEMSYNTH Lite")
-    st.markdown("""
-    **SEMSYNTH Lite** là hệ thống tổng hợp chương trình tương tác, giải quyết
-    rào cản **Cognitive Friction Gap** bằng cách:
-
-    1. **Nhận** mô tả bài toán bằng ngôn ngữ tự nhiên
-    2. **Sinh** Top-K chương trình ứng viên qua LLM
-    3. **Đặt câu hỏi** Đúng/Sai ở mức ngữ nghĩa để phân biệt ứng viên
-    4. **Lọc** ứng viên dựa trên câu trả lời
-    5. **Trả về** mã Python chính xác nhất
-
-    ### So sánh với các phương pháp khác
-
-    | Phương pháp | Tải nhận thức | Tỷ lệ thành công |
-    |---|---|---|
-    | PBE (FlashFill) | 🔴 Cao | ~70–80% |
-    | Direct LLM | 🟢 Thấp | ~55–65% |
-    | Interactive (TiCoder) | 🟡 TB | ~70–80% |
-    | **SEMSYNTH Lite** | 🟢 **Rất thấp** | 🎯 **≥75–85%** |
-
-    ### Tech Stack
-    - Python 3.10+ · OpenAI API / OpenRouter
-    - Streamlit · pytest
-    """)
+st.divider()
+st.markdown("**Kaggle:** use `kaggle_run.py` for a one-cell smoke demo after cloning the repository.")

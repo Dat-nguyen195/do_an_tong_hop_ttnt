@@ -1,121 +1,177 @@
-"""
-SEMSYNTH Lite — Question Generator
-====================================
-Module sinh câu hỏi ngữ nghĩa Đúng/Sai (Semantic Yes/No Questions)
-để phân biệt các chương trình ứng viên.
-
-Chiến lược:
-    - Greedy Disambiguation: Chọn câu hỏi phân chia tập ứng viên đều nhất (~50/50).
-    - Semantic-Level: Câu hỏi về hành vi chương trình, không phải cú pháp.
-
-Lưu ý: Module này là scaffold cho Phase 1.
-        Logic chi tiết sẽ được hiện thực đầy đủ ở Phase 2.
-"""
-
+"""Behavioral disagreement search and balanced Yes/No question selection."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+import json
+import math
+from dataclasses import dataclass, field
+from itertools import product
 from typing import Any
 
+from src.candidate_manager import Candidate
+from src.code_executor import CodeExecutor
 
-# ---------------------------------------------------------------------------
-# Data Models
-# ---------------------------------------------------------------------------
+
+def _freeze(value: Any) -> str:
+    try:
+        return json.dumps(value, sort_keys=True, ensure_ascii=False)
+    except TypeError:
+        return repr(value)
+
 
 @dataclass
 class ClarificationQuestion:
-    """Đại diện cho một câu hỏi làm rõ ngữ nghĩa."""
-
     question: str
-    """Nội dung câu hỏi dạng NL (tiếng Anh)."""
-
     test_input: dict[str, Any]
-    """Input phân biệt (distinguishing input) dùng để tách nhóm ứng viên."""
-
-    expected_outputs: dict[str, Any]
-    """Mapping: {"yes": output_nếu_Yes, "no": output_nếu_No}."""
-
+    yes_candidate_ids: list[int]
+    no_candidate_ids: list[int]
+    yes_output: Any
+    no_outputs: list[Any] = field(default_factory=list)
     info_gain: float = 0.0
-    """Lượng thông tin kỳ vọng thu được (information gain). Cao hơn = tốt hơn."""
+    balance: float = 0.0
 
-    def __repr__(self) -> str:
-        return (
-            f"ClarificationQuestion(gain={self.info_gain:.3f}, "
-            f"q='{self.question[:50]}...')"
-        )
+    @property
+    def expected_outputs(self) -> dict[str, Any]:
+        return {"yes": self.yes_output, "no": self.no_outputs[0] if len(self.no_outputs) == 1 else self.no_outputs}
 
-
-# ---------------------------------------------------------------------------
-# Question Generator
-# ---------------------------------------------------------------------------
 
 class QuestionGenerator:
-    """
-    Sinh câu hỏi ngữ nghĩa Đúng/Sai để phân biệt các ứng viên.
-
-    Workflow:
-        1. Phân tích sự khác biệt hành vi giữa các ứng viên.
-        2. Tìm distinguishing input (input mà các ứng viên cho output khác nhau).
-        3. Sinh câu hỏi NL dựa trên sự khác biệt đó.
-        4. Chọn câu hỏi có information gain cao nhất.
-
-    Note:
-        Logic chi tiết sẽ được hiện thực ở Phase 2.
-    """
-
-    def __init__(self, max_questions: int = 5):
-        """
-        Args:
-            max_questions: Số câu hỏi tối đa cho mỗi bài toán.
-        """
+    def __init__(self, executor: CodeExecutor | None = None, max_questions: int = 5, max_probe_inputs: int = 12):
+        self.executor = executor or CodeExecutor()
         self.max_questions = max_questions
+        self.max_probe_inputs = max_probe_inputs
         self._questions_asked: list[ClarificationQuestion] = []
+
+    @staticmethod
+    def _mutations(value: Any) -> list[Any]:
+        values = [value]
+        if isinstance(value, bool):
+            values += [not value]
+        elif isinstance(value, int) and not isinstance(value, bool):
+            values += [0, 1, -1, value + 1]
+        elif isinstance(value, float):
+            values += [0.0, 1.0, value / 2]
+        elif isinstance(value, str):
+            values += ["", value[:1], value.upper(), value + value[:1]]
+        elif isinstance(value, list):
+            values += [[], value[:1], list(reversed(value))]
+            if value:
+                values += [value + [value[0]]]
+                try:
+                    values += [sorted(value)]
+                except TypeError:
+                    pass
+        dedup = []
+        seen = set()
+        for item in values:
+            key = _freeze(item)
+            if key not in seen:
+                seen.add(key)
+                dedup.append(item)
+        return dedup[:5]
+
+    def build_probe_inputs(self, seed_inputs: list[dict[str, Any]] | None, params: str = "") -> list[dict[str, Any]]:
+        seeds = list(seed_inputs or [])
+        if not seeds:
+            names = [p.strip() for p in params.split(",") if p.strip()]
+            default: dict[str, Any] = {}
+            for name in names:
+                n = name.lower()
+                if any(t in n for t in ("list", "nums", "numbers", "arr", "xs", "items")):
+                    default[name] = [2, 1, 2]
+                elif any(t in n for t in ("str", "text", "word", "s")):
+                    default[name] = "aba"
+                elif n in {"n", "k", "x", "threshold"}:
+                    default[name] = 2
+                else:
+                    default[name] = 1
+            if default:
+                seeds = [default]
+        probes: list[dict[str, Any]] = []
+        seen = set()
+        for seed in seeds:
+            choices = [self._mutations(v) for v in seed.values()]
+            keys = list(seed.keys())
+            for combo in product(*choices):
+                item = dict(zip(keys, combo))
+                key = _freeze(item)
+                if key not in seen:
+                    seen.add(key)
+                    probes.append(item)
+                if len(probes) >= self.max_probe_inputs:
+                    return probes
+        return probes
+
+    def _partition(self, candidates: list[Candidate], function_name: str, test_input: dict[str, Any]):
+        groups: dict[str, dict[str, Any]] = {}
+        for c in candidates:
+            ok, value, error = self.executor.execute_function(c.code, function_name, test_input)
+            observed = value if ok else {"__error__": error}
+            key = _freeze(observed)
+            groups.setdefault(key, {"value": observed, "ids": []})["ids"].append(c.index)
+            c.metadata.setdefault("behavior_signature", {})[_freeze(test_input)] = observed
+        return list(groups.values())
+
+    @staticmethod
+    def _binary_score(n_total: int, yes_n: int) -> tuple[float, float]:
+        no_n = n_total - yes_n
+        if yes_n == 0 or no_n == 0:
+            return 0.0, 0.0
+        p = yes_n / n_total
+        entropy = -(p * math.log2(p) + (1 - p) * math.log2(1 - p))
+        balance = 1.0 - abs(yes_n - no_n) / n_total
+        return entropy, balance
 
     def generate_question(
         self,
-        candidates: list[Any],
+        candidates: list[Candidate],
         function_name: str,
         description: str,
+        seed_inputs: list[dict[str, Any]] | None = None,
+        params: str = "",
     ) -> ClarificationQuestion | None:
-        """
-        Sinh câu hỏi phân biệt tốt nhất cho tập ứng viên hiện tại.
-
-        Args:
-            candidates: Danh sách Candidate objects còn active.
-            function_name: Tên hàm.
-            description: Mô tả bài toán gốc.
-
-        Returns:
-            ClarificationQuestion hoặc None nếu không cần hỏi thêm.
-
-        Note:
-            Sẽ được hiện thực chi tiết ở Phase 2.
-        """
-        # Kiểm tra điều kiện dừng
-        if len(candidates) <= 1:
+        if len(candidates) <= 1 or len(self._questions_asked) >= self.max_questions:
             return None
-
-        if len(self._questions_asked) >= self.max_questions:
-            return None
-
-        # TODO: Phase 2 — Implement question generation logic
-        # 1. Tạo distinguishing inputs
-        # 2. Chạy mỗi ứng viên, phân nhóm theo output
-        # 3. Dùng LLM sinh câu hỏi NL từ sự khác biệt
-        # 4. Tính information gain, chọn câu hỏi tối ưu
-
-        return None
+        probes = self.build_probe_inputs(seed_inputs, params)
+        best: ClarificationQuestion | None = None
+        for test_input in probes:
+            groups = self._partition(candidates, function_name, test_input)
+            if len(groups) <= 1:
+                continue
+            # Turn a possibly multi-way behavioral split into the best binary
+            # property: "should output equal Y?". This supports >2 outputs.
+            for group in groups:
+                yes_ids = list(group["ids"])
+                no_ids = [c.index for c in candidates if c.index not in yes_ids]
+                info_gain, balance = self._binary_score(len(candidates), len(yes_ids))
+                if not no_ids:
+                    continue
+                q = ClarificationQuestion(
+                    question=f"For input {test_input}, should the function return {group['value']!r}?",
+                    test_input=test_input,
+                    yes_candidate_ids=yes_ids,
+                    no_candidate_ids=no_ids,
+                    yes_output=group["value"],
+                    no_outputs=[g["value"] for g in groups if g is not group],
+                    info_gain=info_gain,
+                    balance=balance,
+                )
+                if best is None or (q.info_gain, q.balance) > (best.info_gain, best.balance):
+                    best = q
+                ideal_balance = 1.0 - abs((len(candidates) // 2) - (len(candidates) - len(candidates) // 2)) / len(candidates)
+                if q.balance >= ideal_balance - 1e-12:
+                    self._questions_asked.append(q)
+                    return q
+        if best is not None:
+            self._questions_asked.append(best)
+        return best
 
     @property
     def questions_asked(self) -> list[ClarificationQuestion]:
-        """Danh sách câu hỏi đã đặt."""
         return list(self._questions_asked)
 
     @property
     def questions_remaining(self) -> int:
-        """Số câu hỏi còn có thể đặt."""
         return max(0, self.max_questions - len(self._questions_asked))
 
-    def reset(self):
-        """Reset trạng thái cho bài toán mới."""
+    def reset(self) -> None:
         self._questions_asked = []
