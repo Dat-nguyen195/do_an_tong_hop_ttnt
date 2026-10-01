@@ -1,39 +1,53 @@
-# Kaggle Quickstart
+# Kaggle Quickstart — Gemini / Offline
 
-## Option A — clone and run without any API key
+Enable **Internet** in the Kaggle notebook if you want to clone GitHub or call Gemini.
 
-In a Kaggle notebook cell:
+## One-cell Gemini run
+
+1. Add a Kaggle secret named `GEMINI_API_KEY`.
+2. Replace `REPO_URL` with your public GitHub repository URL.
+3. Run this cell:
+
+```python
+import os, subprocess, sys
+from pathlib import Path
+from kaggle_secrets import UserSecretsClient
+
+REPO_URL = "https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPO>.git"
+WORKDIR = Path("/kaggle/working/semsynth-lite")
+
+if not WORKDIR.exists():
+    subprocess.run(["git", "clone", REPO_URL, str(WORKDIR)], check=True)
+
+os.chdir(WORKDIR)
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "requirements.txt"], check=True)
+
+os.environ["GEMINI_API_KEY"] = UserSecretsClient().get_secret("GEMINI_API_KEY")
+os.environ["LLM_PROVIDER"] = "gemini"
+os.environ["DEFAULT_MODEL"] = "gemini-3.8-flash"
+
+subprocess.run([sys.executable, "-m", "pytest", "-q"], check=True)
+subprocess.run([sys.executable, "kaggle_run.py", "--offline-suite"], check=True)
+subprocess.run([
+    sys.executable, "kaggle_run.py",
+    "--provider", "gemini",
+    "--model", "gemini-3.8-flash",
+    "--top-k", "5",
+    "--max-questions", "4",
+], check=True)
+```
+
+## Offline only
 
 ```bash
-!git clone https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPO>.git semsynth-lite
-%cd semsynth-lite
-!pip install -q -r requirements.txt
-!python kaggle_run.py --offline
+!python kaggle_run.py --offline-suite
 !pytest -q
 ```
 
-This validates the full candidate → disagreement → Yes/No → filtering loop using the deterministic offline demo client.
-
-## Option B — real LLM
-
-1. Add `OPENAI_API_KEY` or `OPENROUTER_API_KEY` in **Kaggle → Add-ons → Secrets**.
-2. Enable Internet for the notebook when the selected API requires it.
-3. Export the secret, then run the script.
-
-```python
-from kaggle_secrets import UserSecretsClient
-import os
-os.environ["OPENAI_API_KEY"] = UserSecretsClient().get_secret("OPENAI_API_KEY")
-```
-
-```bash
-!python kaggle_run.py --provider openai --model gpt-4o-mini
-```
-
-For OpenRouter, set `OPENROUTER_API_KEY` and use `--provider openrouter`.
+No API key is required for this mode.
 
 ## Notes
 
-- `--offline` is a smoke/demo mode, **not** an experimental result.
-- Generated code is executed in a subprocess with timeout and an AST policy. This is process isolation for a course/research demo, not a hardened multi-tenant sandbox.
-- For a fair experiment, compare Direct-1, an explicitly labelled Best-of-K upper bound, and SEMSYNTH under matched candidate budgets.
+- Keep `GEMINI_API_KEY` in Kaggle Secrets; do not hard-code it in the notebook or commit it.
+- The offline suite is a deterministic smoke test, not an experimental benchmark result.
+- Generated code is process-isolated with an AST policy and timeout, but this is not a hardened multi-tenant sandbox.

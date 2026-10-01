@@ -53,6 +53,10 @@ class SEMSYNTHController:
         unique_codes = list(dict.fromkeys(code.strip() for code in raw_codes if code and code.strip()))
         self.candidate_manager.add_candidates(unique_codes)
         transcript: list[dict[str, Any]] = []
+        termination_reason: str | None = None
+
+        if self.candidate_manager.active_count == 0:
+            termination_reason = "no_candidates"
 
         while not self.candidate_manager.is_converged:
             active = self.candidate_manager.get_active()
@@ -60,6 +64,11 @@ class SEMSYNTHController:
                 active, function_name, description, seed_inputs=seed_inputs, params=params
             )
             if question is None:
+                termination_reason = (
+                    "question_budget_exhausted"
+                    if self.question_generator.questions_remaining == 0
+                    else "no_distinguishing_question"
+                )
                 break
             try:
                 answer = bool(answer_callback(question.question, question))
@@ -85,7 +94,17 @@ class SEMSYNTHController:
                 "candidates_after": self.candidate_manager.active_count,
             })
             if removed == 0:
+                termination_reason = "non_discriminating_answer"
                 break
+
+        if termination_reason is None:
+            termination_reason = (
+                "single_candidate"
+                if self.candidate_manager.active_count == 1
+                else "no_candidates"
+                if self.candidate_manager.active_count == 0
+                else "stopped"
+            )
 
         best = self.candidate_manager.get_best()
         return SessionResult(
@@ -98,6 +117,7 @@ class SEMSYNTHController:
                 "provider": getattr(self.llm, "provider", "unknown"),
                 "model": getattr(self.llm, "model", "unknown"),
                 "converged": self.candidate_manager.is_converged,
+                "termination_reason": termination_reason,
                 "candidate_history": self.candidate_manager.history,
             },
         )

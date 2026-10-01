@@ -24,7 +24,7 @@ Return current best candidate + full interaction log
 
 ## What is implemented
 
-- ✅ OpenAI / OpenRouter unified LLM client
+- ✅ Gemini / OpenAI / OpenRouter unified LLM client
 - ✅ real candidate sampling temperatures + duplicate removal
 - ✅ deterministic offline mock mode for zero-key demos
 - ✅ candidate execution and behavioral signatures
@@ -37,7 +37,7 @@ Return current best candidate + full interaction log
 - ✅ stateful Streamlit demo
 - ✅ Kaggle quickstart script and notebook
 - ✅ subprocess execution, AST policy checks and timeout
-- ✅ 40 automated tests covering the core loop
+- ✅ 70 automated tests covering the core loop, provider adapter, probe generation and executor edge cases
 
 > **Execution safety note:** generated code runs in a fresh subprocess with an AST policy, isolated working directory and timeout. This is suitable process isolation for a local/course prototype; it is **not a hardened multi-tenant sandbox**.
 
@@ -70,23 +70,24 @@ Copy the environment template:
 cp .env.example .env
 ```
 
-Set one provider key in `.env`:
+Set one provider key in `.env`. Gemini is the recommended default for this repository:
 
 ```dotenv
-LLM_PROVIDER=openai
-DEFAULT_MODEL=gpt-4o-mini
-OPENAI_API_KEY=...
+LLM_PROVIDER=gemini
+DEFAULT_MODEL=gemini-3.8-flash
+GEMINI_API_KEY=...
 ```
 
 Then run:
 
 ```bash
-python kaggle_run.py --provider openai --model gpt-4o-mini
+python kaggle_run.py --provider gemini --model gemini-3.8-flash
 ```
 
-OpenRouter is also supported:
+OpenAI and OpenRouter remain supported:
 
 ```bash
+python kaggle_run.py --provider openai --model gpt-4o-mini
 python kaggle_run.py --provider openrouter --model <OPENROUTER_MODEL_NAME>
 ```
 
@@ -117,19 +118,25 @@ REPO_URL = "https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPOSITORY>.git"
 !pytest -q
 ```
 
-### Cell 3B — real OpenAI mode
+### Cell 3B — real Gemini mode
 
-Add `OPENAI_API_KEY` under **Kaggle → Add-ons → Secrets**, then:
+Add `GEMINI_API_KEY` under **Kaggle → Add-ons → Secrets**, then:
 
 ```python
 from kaggle_secrets import UserSecretsClient
 import os
 
-os.environ["OPENAI_API_KEY"] = UserSecretsClient().get_secret("OPENAI_API_KEY")
-os.environ["LLM_PROVIDER"] = "openai"
-os.environ["DEFAULT_MODEL"] = "gpt-4o-mini"
+os.environ["GEMINI_API_KEY"] = UserSecretsClient().get_secret("GEMINI_API_KEY")
+os.environ["LLM_PROVIDER"] = "gemini"
+os.environ["DEFAULT_MODEL"] = "gemini-3.8-flash"
 
-!python kaggle_run.py --provider openai --model gpt-4o-mini
+!python kaggle_run.py --provider gemini --model gemini-3.8-flash
+```
+
+You can also run a deterministic multi-case smoke suite before using the API:
+
+```bash
+python kaggle_run.py --offline-suite
 ```
 
 A notebook-ready version is included at:
@@ -149,7 +156,7 @@ streamlit run app.py
 The UI supports:
 
 - offline demo mode;
-- real OpenAI/OpenRouter mode;
+- real Gemini/OpenAI/OpenRouter mode;
 - Top-K configuration;
 - stateful Yes/No clarification;
 - candidate count tracking;

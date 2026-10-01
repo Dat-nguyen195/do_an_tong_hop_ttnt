@@ -18,7 +18,7 @@ try:
 except ImportError:
     pass
 
-SUPPORTED_PROVIDERS = ("openai", "openrouter")
+SUPPORTED_PROVIDERS = ("openai", "openrouter", "gemini")
 PROVIDER_CONFIG = {
     "openai": {
         "env_key": "OPENAI_API_KEY",
@@ -29,6 +29,11 @@ PROVIDER_CONFIG = {
         "env_key": "OPENROUTER_API_KEY",
         "base_url": "https://openrouter.ai/api/v1",
         "default_model": "openai/gpt-4o-mini",
+    },
+    "gemini": {
+        "env_key": "GEMINI_API_KEY",
+        "base_url": None,
+        "default_model": "gemini-3.8-flash",
     },
 }
 
@@ -58,13 +63,22 @@ class LLMClient:
     def _get_client(self):
         if self._client is not None:
             return self._client
+        if not self.api_key:
+            env_var = PROVIDER_CONFIG[self.provider]["env_key"]
+            raise ValueError(f"Missing API key. Set {env_var}.")
+
+        if self.provider == "gemini":
+            try:
+                from google import genai
+            except ImportError as exc:
+                raise RuntimeError("Install the 'google-genai' package first.") from exc
+            self._client = genai.Client(api_key=self.api_key)
+            return self._client
+
         try:
             from openai import OpenAI
         except ImportError as exc:
             raise RuntimeError("Install the 'openai' package first.") from exc
-        if not self.api_key:
-            env_var = PROVIDER_CONFIG[self.provider]["env_key"]
-            raise ValueError(f"Missing API key. Set {env_var}.")
         kwargs: dict[str, Any] = {"api_key": self.api_key}
         if self.base_url:
             kwargs["base_url"] = self.base_url
@@ -72,6 +86,22 @@ class LLMClient:
         return self._client
 
     def chat(self, user_message: str, system_message: str = "You are a helpful assistant.", **kwargs) -> str:
+        if self.provider == "gemini":
+            try:
+                from google.genai import types
+            except ImportError as exc:
+                raise RuntimeError("Install the 'google-genai' package first.") from exc
+            response = self._get_client().models.generate_content(
+                model=self.model,
+                contents=user_message,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_message,
+                    temperature=kwargs.get("temperature", self.temperature),
+                    max_output_tokens=kwargs.get("max_tokens", self.max_tokens),
+                ),
+            )
+            return getattr(response, "text", "") or ""
+
         response = self._get_client().chat.completions.create(
             model=self.model,
             messages=[
@@ -84,6 +114,20 @@ class LLMClient:
         return response.choices[0].message.content or ""
 
     def chat_multi(self, messages: list[dict[str, str]], **kwargs) -> str:
+        if self.provider == "gemini":
+            system_parts = [m["content"] for m in messages if m.get("role") == "system"]
+            conversation = []
+            for m in messages:
+                if m.get("role") == "system":
+                    continue
+                role = m.get("role", "user").upper()
+                conversation.append(f"{role}: {m.get('content', '')}")
+            return self.chat(
+                "\n\n".join(conversation),
+                system_message="\n".join(system_parts) or "You are a helpful assistant.",
+                **kwargs,
+            )
+
         response = self._get_client().chat.completions.create(
             model=self.model,
             messages=messages,

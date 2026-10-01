@@ -76,11 +76,18 @@ class QuestionGenerator:
             default: dict[str, Any] = {}
             for name in names:
                 n = name.lower()
-                if any(t in n for t in ("list", "nums", "numbers", "arr", "xs", "items")):
+                if (
+                    any(t in n for t in ("list", "nums", "numbers", "array", "arr", "items", "values"))
+                    or n in {"xs", "ys", "test_tup1", "test_tup2", "tup1", "tup2"}
+                    or "tuple" in n or "tup" in n
+                ):
                     default[name] = [2, 1, 2]
-                elif any(t in n for t in ("str", "text", "word", "s")):
+                elif (
+                    any(t in n for t in ("string", "str", "text", "word", "pattern", "prefix", "suffix"))
+                    or n in {"s", "ch", "char", "sub_str"}
+                ):
                     default[name] = "aba"
-                elif n in {"n", "k", "x", "threshold"}:
+                elif n in {"n", "k", "x", "y", "threshold", "limit", "count", "size"}:
                     default[name] = 2
                 else:
                     default[name] = 1
@@ -140,6 +147,10 @@ class QuestionGenerator:
             # Turn a possibly multi-way behavioral split into the best binary
             # property: "should output equal Y?". This supports >2 outputs.
             for group in groups:
+                # Never ask the user to endorse an execution error as intended behavior.
+                # Erroring candidates can still appear in the No partition.
+                if isinstance(group["value"], dict) and "__error__" in group["value"]:
+                    continue
                 yes_ids = list(group["ids"])
                 no_ids = [c.index for c in candidates if c.index not in yes_ids]
                 info_gain, balance = self._binary_score(len(candidates), len(yes_ids))

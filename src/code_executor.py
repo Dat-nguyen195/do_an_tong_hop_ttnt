@@ -20,6 +20,7 @@ _ALLOWED_IMPORTS = {
 }
 _FORBIDDEN_CALLS = {
     "open", "exec", "eval", "compile", "input", "breakpoint", "__import__",
+    "globals", "locals", "vars", "getattr", "setattr", "delattr",
 }
 
 
@@ -43,6 +44,16 @@ class _SafetyVisitor(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call):
         if isinstance(node.func, ast.Name) and node.func.id in _FORBIDDEN_CALLS:
             raise UnsafeCodeError(f"Call '{node.func.id}' is not allowed")
+        self.generic_visit(node)
+
+    def visit_Name(self, node: ast.Name):
+        if node.id == "__builtins__" or node.id.startswith("__"):
+            raise UnsafeCodeError(f"Name '{node.id}' is not allowed")
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node: ast.Attribute):
+        if node.attr.startswith("__"):
+            raise UnsafeCodeError(f"Attribute '{node.attr}' is not allowed")
         self.generic_visit(node)
 
 
@@ -79,7 +90,10 @@ class CodeExecutor:
             self.validate_code(code)
         except (SyntaxError, UnsafeCodeError) as exc:
             return False, None, f"{type(exc).__name__}: {exc}"
-        payload = json.dumps({"code": code, "function_name": function_name, "test_input": test_input}, ensure_ascii=False)
+        try:
+            payload = json.dumps({"code": code, "function_name": function_name, "test_input": test_input}, ensure_ascii=False)
+        except TypeError as exc:
+            return False, None, f"Test input is not JSON serializable: {exc}"
         try:
             with tempfile.TemporaryDirectory(prefix="semsynth_") as tmp:
                 proc = subprocess.run(
@@ -121,7 +135,7 @@ class CodeExecutor:
         results = [self.run_test_case(code, function_name, tc) for tc in test_cases]
         pass_count = sum(bool(r["passed"]) for r in results)
         return {
-            "passed_all": pass_count == len(test_cases),
+            "passed_all": bool(test_cases) and pass_count == len(test_cases),
             "pass_count": pass_count,
             "total": len(test_cases),
             "results": results,

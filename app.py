@@ -6,7 +6,7 @@ import streamlit as st
 
 from src.candidate_manager import CandidateManager
 from src.code_executor import CodeExecutor
-from src.llm_client import LLMClient, MockLLMClient
+from src.llm_client import LLMClient, MockLLMClient, PROVIDER_CONFIG
 from src.question_generator import QuestionGenerator
 
 st.set_page_config(page_title="SEMSYNTH Lite", page_icon="🧪", layout="wide")
@@ -65,8 +65,14 @@ st.caption("Behavior-guided semantic clarification for Python program synthesis"
 
 with st.sidebar:
     mode = st.radio("Mode", ["Offline demo (no API key)", "Real LLM"])
-    provider = st.selectbox("Provider", ["openai", "openrouter"])
-    model = st.text_input("Model", value=os.getenv("DEFAULT_MODEL", "gpt-4o-mini"))
+    provider = st.selectbox("Provider", ["gemini", "openai", "openrouter"])
+    env_provider = os.getenv("LLM_PROVIDER", "").lower()
+    default_model = (
+        os.getenv("DEFAULT_MODEL")
+        if env_provider == provider and os.getenv("DEFAULT_MODEL")
+        else PROVIDER_CONFIG[provider]["default_model"]
+    )
+    model = st.text_input("Model", value=default_model, key=f"model_{provider}")
     top_k = st.slider("Top-K", 2, 8, 5)
     max_questions = st.slider("Max questions", 1, 6, 4)
     st.warning("Execution is process-isolated for a research demo, not a hardened multi-tenant sandbox.")
