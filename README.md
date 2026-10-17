@@ -311,3 +311,29 @@ The suite covers:
 ## License / purpose
 
 Academic course/research prototype for the 2026–2027 semester.
+
+## 2026 Kaggle-first reproducible benchmark patch
+
+The new CPU-only, resumable study runner is `run_experiments.py`; see
+[`notebooks/KAGGLE_QUICKSTART.md`](notebooks/KAGGLE_QUICKSTART.md) for a
+full Kaggle one-cell notebook and the two-session sharding option.
+
+```bash
+python -m pip install -r requirements-kaggle.txt
+python -m pytest -q
+python scripts/preflight.py --mode offline
+python run_experiments.py --quick       # 8 controlled regression cases
+python run_experiments.py               # 32 controlled cases, 8 families
+```
+
+Task-level checkpoints, summaries, and `SEMSYNTH_RESULTS.zip` are created
+inside `results/semsynth_benchmark/<run-id>/`. No key or GPU is needed for
+this controlled offline run. **Offline accuracy is not evidence of live-LLM
+program-synthesis performance.** Optional live candidate generation requires
+`requirements-llm.txt` and the corresponding provider key in Kaggle Secrets.
+
+The mathematical extension adds configurable Bayesian belief updates,
+execution-grounded semantic question templates, and improved probe coverage.
+The original `kaggle_run.py --offline-suite` and original public controller
+API remain supported. The controller's `success` is a legacy candidate-exists
+flag; published accuracy must use benchmark `passed_all` outcomes instead.

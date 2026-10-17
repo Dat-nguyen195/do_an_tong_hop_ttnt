@@ -1,53 +1,42 @@
-# Kaggle Quickstart — Gemini / Offline
+# SEMSYNTH: Kaggle one-cell execution
 
-Enable **Internet** in the Kaggle notebook if you want to clone GitHub or call Gemini.
+The **recommended notebook** is [`KAGGLE_ONE_CELL.ipynb`](KAGGLE_ONE_CELL.ipynb).
 
-## One-cell Gemini run
+1. Push the contents of the **patch ZIP** over the same paths in your original GitHub repository. Keep all original unmodified files.
+2. In Kaggle, enable **Internet** (required for GitHub clone), add a notebook, and paste the one code cell from `KAGGLE_ONE_CELL.ipynb`.
+3. Set `REPO_URL` to your GitHub repository. The notebook installs the minimal dependencies, runs the automated tests, checks the environment, executes the experiment and writes `SEMSYNTH_RESULTS.zip` under `/kaggle/working/semsynth_results/<run-id>/`.
+4. The default `MODE="offline"` needs **no API key, no GPU, and no training**. It runs **32 controlled synthetic task instances from eight template families**. These are correctness regressions, **not real-LLM efficacy claims**.
+5. To use real candidate generation, set `MODE="real"`, enable Internet, set the `GEMINI_API_KEY` Kaggle Secret (or another supported provider secret), and set `MODEL` only if needed. Cloud provider availability/quotas have not been tested in this patch.
+6. If Kaggle interrupts the run, execute the same notebook again with the same settings and retained `/kaggle/working` output. Completed task-method checkpoints are skipped. For a *new* Kaggle session, attach prior results and copy the matching run-id directory into the output folder first.
 
-1. Add a Kaggle secret named `GEMINI_API_KEY`.
-2. Replace `REPO_URL` with your public GitHub repository URL.
-3. Run this cell:
+## Parallel, nonoverlapping Kaggle sessions
 
-```python
-import os, subprocess, sys
-from pathlib import Path
-from kaggle_secrets import UserSecretsClient
-
-REPO_URL = "https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPO>.git"
-WORKDIR = Path("/kaggle/working/semsynth-lite")
-
-if not WORKDIR.exists():
-    subprocess.run(["git", "clone", REPO_URL, str(WORKDIR)], check=True)
-
-os.chdir(WORKDIR)
-subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "requirements.txt"], check=True)
-
-os.environ["GEMINI_API_KEY"] = UserSecretsClient().get_secret("GEMINI_API_KEY")
-os.environ["LLM_PROVIDER"] = "gemini"
-os.environ["DEFAULT_MODEL"] = "gemini-3.8-flash"
-
-subprocess.run([sys.executable, "-m", "pytest", "-q"], check=True)
-subprocess.run([sys.executable, "kaggle_run.py", "--offline-suite"], check=True)
-subprocess.run([
-    sys.executable, "kaggle_run.py",
-    "--provider", "gemini",
-    "--model", "gemini-3.8-flash",
-    "--top-k", "5",
-    "--max-questions", "4",
-], check=True)
-```
-
-## Offline only
+Set `NUM_SHARDS=2, SHARD_INDEX=0` in session A and `NUM_SHARDS=2, SHARD_INDEX=1` in session B. **Each session is independent**: it does not wait for the other or require shared storage. Both must use identical experiment settings and repository revision. Download their `SEMSYNTH_RESULTS.zip` files, then merge them locally with:
 
 ```bash
-!python kaggle_run.py --offline-suite
-!pytest -q
+python scripts/merge_shards.py shard0.zip shard1.zip --output-dir results/merged
 ```
 
-No API key is required for this mode.
+Do not interpret a partial shard's `pass_rate_on_completed` as a full-benchmark comparison. Check `completeness.json` for `all_complete: true` after merging.
 
-## Notes
+## Commands without notebook
 
-- Keep `GEMINI_API_KEY` in Kaggle Secrets; do not hard-code it in the notebook or commit it.
-- The offline suite is a deterministic smoke test, not an experimental benchmark result.
-- Generated code is process-isolated with an AST policy and timeout, but this is not a hardened multi-tenant sandbox.
+```bash
+python -m pip install -r requirements-kaggle.txt
+python -m pytest -q
+python scripts/preflight.py --mode offline
+python run_experiments.py --quick
+python run_experiments.py --seed 3101 --max-minutes 600
+python run_experiments.py --seed 3101 --num-shards 2 --shard-index 0
+python run_experiments.py --seed 3101 --num-shards 2 --shard-index 1
+```
+
+The six methods are `direct1`, `first_valid`, `random`, `balanced`, `proposed`, and `oracle_upper_bound`. The oracle upper bound uses hidden evaluation outcomes to choose a candidate and is **not a deployable baseline**. All other methods share the same candidate pool per task, with held-out evaluation occurring only after selection.
+
+## What is and is not measured
+
+- `passed_all` is the separate held-out input test result. The controller's backward-compatible `success` means **a candidate exists**, not that it is correct.
+- `proposed` enables semantic questions where execution justifies the wording plus probabilistic belief updates. Unknown/noisy responses are not human-evaluated in the offline data.
+- `--simulated-flip-rate 0.1` is an optional error-injection stress test; it cannot simulate all human misunderstandings.
+- Cached execution assumes deterministic pure functions, and process isolation is **not** a hardened security sandbox. Do not run arbitrary hostile code on public infrastructure.
+- The 32 cases share only eight underlying templates. They are primarily a reproducible **software regression** benchmark; stronger empirical claims require genuinely independent tasks, rigorous annotation, human subjects, and real LLM repetitions.

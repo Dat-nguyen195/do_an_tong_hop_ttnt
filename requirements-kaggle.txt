@@ -1,0 +1,2 @@
+# Offline CPU benchmark and pytest are intentionally independent of cloud APIs.
+pytest>=8.0,<10

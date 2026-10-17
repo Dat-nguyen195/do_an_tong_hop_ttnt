@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import re
+import time
 from pathlib import Path
 from typing import Any
 
@@ -184,6 +185,8 @@ class LLMClient:
         candidates: list[str] = []
         seen: set[str] = set()
         attempt = 0
+        failures = 0
+        last_error: Exception | None = None
         max_attempts = max(k, 3 * k)
         hints = [
             "prefer the most literal interpretation",
@@ -194,18 +197,39 @@ class LLMClient:
         ]
         while len(candidates) < k and attempt < max_attempts:
             temp = min(0.25 + 0.15 * attempt, 1.0)
-            code = self.generate_code(
-                description,
-                function_name,
-                params,
-                temperature=temp,
-                variant_hint=hints[attempt % len(hints)],
-            ).strip()
+            try:
+                code = self.generate_code(
+                    description,
+                    function_name,
+                    params,
+                    temperature=temp,
+                    variant_hint=hints[attempt % len(hints)],
+                ).strip()
+            except Exception as exc:
+                # Retriable provider failures are bounded by the SAME 3*k
+                # request budget. No retry for malformed keys or credentials.
+                message = str(exc).lower()
+                retryable = any(s in message for s in (
+                    "429", "500", "502", "503", "504", "timeout", "timed out",
+                    "temporarily", "rate limit", "service unavailable"))
+                if not retryable:
+                    raise
+                last_error = exc
+                failures += 1
+                attempt += 1
+                if attempt < max_attempts:
+                    time.sleep(min(0.25 * 2 ** min(failures, 4), 4.0))
+                continue
             normalized = re.sub(r"\s+", " ", code).strip()
             if code and normalized not in seen:
                 seen.add(normalized)
                 candidates.append(code)
             attempt += 1
+        if not candidates and last_error is not None:
+            raise RuntimeError(
+                f"Provider failed across {attempt} bounded attempts: "
+                f"{type(last_error).__name__}: {last_error}"
+            ) from last_error
         return candidates
 
     @staticmethod

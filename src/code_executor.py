@@ -8,7 +8,10 @@ multi-tenant arbitrary-code execution service.
 from __future__ import annotations
 
 import ast
+import copy
+import hashlib
 import json
+from collections import OrderedDict
 import subprocess
 import sys
 import tempfile
@@ -76,9 +79,48 @@ except Exception as exc:
 '''
 
 
+_BATCH_RUNNER = r'''
+import json, sys
+payload = json.loads(sys.stdin.read())
+results = []
+for test_input in payload["test_inputs"]:
+    try:
+        ns = {"__name__": "__candidate__"}
+        exec(payload["code"], ns, ns)
+        fn = ns.get(payload["function_name"])
+        if not callable(fn):
+            raise RuntimeError("Function '%s' not found in generated code." % payload["function_name"])
+        value = fn(**test_input)
+        try:
+            result = {"ok": True, "result": value}
+            json.dumps(result)
+        except (TypeError, ValueError):
+            result = {"ok": True, "result_repr": repr(value)}
+        results.append(result)
+    except Exception as exc:
+        results.append({"ok": False, "error": type(exc).__name__ + ": " + str(exc)})
+print(json.dumps(results, ensure_ascii=False))
+'''
+
+
 class CodeExecutor:
-    def __init__(self, timeout: int = 5):
+    """Isolated executor with a bounded, per-instance deterministic memo cache.
+
+    Cache only when candidates are pure/deterministic. Turn off caching for
+    stochastic or time-dependent generated functions.
+    """
+    def __init__(self, timeout: int = 5, cache_size: int = 2048, enable_cache: bool = True):
         self.timeout = timeout
+        self.cache_size = max(0, cache_size) if enable_cache else 0
+        self._cache: OrderedDict[str, tuple[bool, Any, str]] = OrderedDict()
+        self.cache_hits = 0
+        self.cache_misses = 0
+        self.subprocess_calls = 0
+
+    @property
+    def stats(self) -> dict[str, int]:
+        return {"hits": self.cache_hits, "misses": self.cache_misses,
+                "subprocess_calls": self.subprocess_calls, "entries": len(self._cache)}
 
     @staticmethod
     def validate_code(code: str) -> None:
@@ -94,6 +136,13 @@ class CodeExecutor:
             payload = json.dumps({"code": code, "function_name": function_name, "test_input": test_input}, ensure_ascii=False)
         except TypeError as exc:
             return False, None, f"Test input is not JSON serializable: {exc}"
+        key = hashlib.sha256((str(self.timeout) + "\0" + payload).encode("utf-8")).hexdigest()
+        if self.cache_size and key in self._cache:
+            self.cache_hits += 1
+            self._cache.move_to_end(key)
+            return copy.deepcopy(self._cache[key])
+        self.cache_misses += 1
+        self.subprocess_calls += 1
         try:
             with tempfile.TemporaryDirectory(prefix="semsynth_") as tmp:
                 proc = subprocess.run(
@@ -102,7 +151,10 @@ class CodeExecutor:
                     text=True,
                     capture_output=True,
                     cwd=tmp,
-                    timeout=self.timeout,
+                    # Startup overhead can be substantial on oversubscribed
+                    # Kaggle CPU workers; preserve an execution budget with a
+                    # small launch grace rather than flaky 1-second probes.
+                    timeout=self.timeout + 2.0,
                     env={},
                 )
         except subprocess.TimeoutExpired:
@@ -115,10 +167,75 @@ class CodeExecutor:
         except json.JSONDecodeError:
             return False, None, "Candidate produced an invalid execution response"
         if not data.get("ok"):
-            return False, None, data.get("error", "Unknown execution error")
-        if "result" in data:
-            return True, data["result"], ""
-        return True, data.get("result_repr"), ""
+            result = (False, None, data.get("error", "Unknown execution error"))
+        elif "result" in data:
+            result = (True, data["result"], "")
+        else:
+            result = (True, data.get("result_repr"), "")
+        if self.cache_size:
+            self._cache[key] = copy.deepcopy(result)
+            if len(self._cache) > self.cache_size:
+                self._cache.popitem(last=False)
+        return result
+
+    def execute_batch(self, code: str, function_name: str,
+                      inputs: list[dict[str, Any]]) -> list[tuple[bool, Any, str]]:
+        """Evaluate many independent probes in one isolated Python process.
+
+        The code is re-executed with a fresh namespace for each input. Each
+        probe is memoized identically to execute_function; timeout covers the
+        entire batch. Not a hardened sandbox for untrusted adversarial code.
+        """
+        if not inputs:
+            return []
+        try:
+            self.validate_code(code)
+        except (SyntaxError, UnsafeCodeError) as exc:
+            return [(False, None, f"{type(exc).__name__}: {exc}")] * len(inputs)
+        results: list[tuple[bool, Any, str] | None] = [None] * len(inputs)
+        uncached: list[tuple[int, dict[str, Any], str]] = []
+        for i, inp in enumerate(inputs):
+            try:
+                payload = json.dumps({"code": code, "function_name": function_name,
+                                      "test_input": inp}, ensure_ascii=False)
+            except TypeError as exc:
+                results[i] = (False, None, f"Test input is not JSON serializable: {exc}")
+                continue
+            key = hashlib.sha256((str(self.timeout) + "\0" + payload).encode("utf-8")).hexdigest()
+            if self.cache_size and key in self._cache:
+                self.cache_hits += 1
+                self._cache.move_to_end(key)
+                results[i] = copy.deepcopy(self._cache[key])
+            else:
+                uncached.append((i, inp, key))
+        if uncached:
+            self.cache_misses += len(uncached)
+            self.subprocess_calls += 1
+            payload = json.dumps({"code": code, "function_name": function_name,
+                                  "test_inputs": [inp for _, inp, _ in uncached]}, ensure_ascii=False)
+            try:
+                with tempfile.TemporaryDirectory(prefix="semsynth_batch_") as tmp:
+                    proc = subprocess.run(
+                        [sys.executable, "-I", "-c", _BATCH_RUNNER], input=payload,
+                        text=True, capture_output=True, cwd=tmp,
+                        timeout=self.timeout * len(uncached) + 2.0, env={},
+                    )
+                if proc.returncode:
+                    raise RuntimeError(proc.stderr.strip() or f"Exit code {proc.returncode}")
+                data = json.loads(proc.stdout.strip().splitlines()[-1])
+                if len(data) != len(uncached):
+                    raise RuntimeError("Incorrect batch response count")
+                batch = [(True, d.get("result", d.get("result_repr")), "") if d.get("ok")
+                         else (False, None, d.get("error", "Unknown error")) for d in data]
+            except (subprocess.TimeoutExpired, RuntimeError, ValueError, IndexError) as exc:
+                batch = [(False, None, f"Batch execution failed: {type(exc).__name__}: {exc}")] * len(uncached)
+            for (i, _, key), value in zip(uncached, batch):
+                results[i] = value
+                if self.cache_size:
+                    self._cache[key] = copy.deepcopy(value)
+                    if len(self._cache) > self.cache_size:
+                        self._cache.popitem(last=False)
+        return [value for value in results if value is not None]
 
     def run_test_case(self, code: str, function_name: str, test_case: dict) -> dict[str, Any]:
         success, actual, error = self.execute_function(code, function_name, test_case["input"])

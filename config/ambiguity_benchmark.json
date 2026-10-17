@@ -1,0 +1,1661 @@
+[
+  {
+    "id": "SYN_DEDUP_01",
+    "source": "synthetic-controlled",
+    "family": "dedup",
+    "variant": 0,
+    "description": "Remove duplicate values from a list. The required output ordering is ambiguous.",
+    "function_name": "remove_duplicates",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          4,
+          1,
+          4,
+          2,
+          1
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def remove_duplicates(xs):\n    return list(dict.fromkeys(xs))",
+      "def remove_duplicates(xs):\n    return sorted(set(xs))",
+      "def remove_duplicates(xs):\n    return xs"
+    ],
+    "reference_code": "def remove_duplicates(xs):\n    return list(dict.fromkeys(xs))",
+    "evaluation_inputs": [
+      {
+        "xs": [
+          5,
+          1,
+          5,
+          3
+        ]
+      },
+      {
+        "xs": [
+          3,
+          3,
+          1,
+          2
+        ]
+      },
+      {
+        "xs": [
+          0,
+          -2,
+          0,
+          3
+        ]
+      },
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          7,
+          7,
+          4,
+          2,
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_DEDUP_02",
+    "source": "synthetic-controlled",
+    "family": "dedup",
+    "variant": 1,
+    "description": "Remove duplicate values from a list. The required output ordering is ambiguous.",
+    "function_name": "remove_duplicates",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          3,
+          2,
+          3,
+          1
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def remove_duplicates(xs):\n    return list(dict.fromkeys(xs))",
+      "def remove_duplicates(xs):\n    return sorted(set(xs))",
+      "def remove_duplicates(xs):\n    return xs"
+    ],
+    "reference_code": "def remove_duplicates(xs):\n    return sorted(set(xs))",
+    "evaluation_inputs": [
+      {
+        "xs": [
+          3,
+          3,
+          1,
+          2
+        ]
+      },
+      {
+        "xs": [
+          0,
+          -2,
+          0,
+          3
+        ]
+      },
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          7,
+          7,
+          4,
+          2,
+          4
+        ]
+      },
+      {
+        "xs": [
+          5,
+          1,
+          5,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_DEDUP_03",
+    "source": "synthetic-controlled",
+    "family": "dedup",
+    "variant": 0,
+    "description": "Remove duplicate values from a list. The required output ordering is ambiguous.",
+    "function_name": "remove_duplicates",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          7,
+          4,
+          7,
+          2,
+          4
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def remove_duplicates(xs):\n    return list(dict.fromkeys(xs))",
+      "def remove_duplicates(xs):\n    return sorted(set(xs))",
+      "def remove_duplicates(xs):\n    return xs"
+    ],
+    "reference_code": "def remove_duplicates(xs):\n    return list(dict.fromkeys(xs))",
+    "evaluation_inputs": [
+      {
+        "xs": [
+          0,
+          -2,
+          0,
+          3
+        ]
+      },
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          7,
+          7,
+          4,
+          2,
+          4
+        ]
+      },
+      {
+        "xs": [
+          5,
+          1,
+          5,
+          3
+        ]
+      },
+      {
+        "xs": [
+          3,
+          3,
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_DEDUP_04",
+    "source": "synthetic-controlled",
+    "family": "dedup",
+    "variant": 1,
+    "description": "Remove duplicate values from a list. The required output ordering is ambiguous.",
+    "function_name": "remove_duplicates",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          9,
+          2,
+          9,
+          5,
+          2
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def remove_duplicates(xs):\n    return list(dict.fromkeys(xs))",
+      "def remove_duplicates(xs):\n    return sorted(set(xs))",
+      "def remove_duplicates(xs):\n    return xs"
+    ],
+    "reference_code": "def remove_duplicates(xs):\n    return sorted(set(xs))",
+    "evaluation_inputs": [
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          7,
+          7,
+          4,
+          2,
+          4
+        ]
+      },
+      {
+        "xs": [
+          5,
+          1,
+          5,
+          3
+        ]
+      },
+      {
+        "xs": [
+          3,
+          3,
+          1,
+          2
+        ]
+      },
+      {
+        "xs": [
+          0,
+          -2,
+          0,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_SORTING_01",
+    "source": "synthetic-controlled",
+    "family": "sorting",
+    "variant": 0,
+    "description": "Sort a list of integers; the requested direction is not specified.",
+    "function_name": "sort_numbers",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          3,
+          1,
+          4,
+          2
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def sort_numbers(xs):\n    return sorted(xs)",
+      "def sort_numbers(xs):\n    return sorted(xs, reverse=True)",
+      "def sort_numbers(xs):\n    return list(xs)"
+    ],
+    "reference_code": "def sort_numbers(xs):\n    return sorted(xs)",
+    "evaluation_inputs": [
+      {
+        "xs": [
+          3,
+          2,
+          1
+        ]
+      },
+      {
+        "xs": [
+          0
+        ]
+      },
+      {
+        "xs": [
+          -4,
+          1,
+          -2,
+          3
+        ]
+      },
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          2,
+          2,
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_SORTING_02",
+    "source": "synthetic-controlled",
+    "family": "sorting",
+    "variant": 1,
+    "description": "Sort a list of integers; the requested direction is not specified.",
+    "function_name": "sort_numbers",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          -2,
+          5,
+          0,
+          1
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def sort_numbers(xs):\n    return sorted(xs)",
+      "def sort_numbers(xs):\n    return sorted(xs, reverse=True)",
+      "def sort_numbers(xs):\n    return list(xs)"
+    ],
+    "reference_code": "def sort_numbers(xs):\n    return sorted(xs, reverse=True)",
+    "evaluation_inputs": [
+      {
+        "xs": [
+          0
+        ]
+      },
+      {
+        "xs": [
+          -4,
+          1,
+          -2,
+          3
+        ]
+      },
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          2,
+          2,
+          1
+        ]
+      },
+      {
+        "xs": [
+          3,
+          2,
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_SORTING_03",
+    "source": "synthetic-controlled",
+    "family": "sorting",
+    "variant": 0,
+    "description": "Sort a list of integers; the requested direction is not specified.",
+    "function_name": "sort_numbers",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          9,
+          1,
+          7,
+          3
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def sort_numbers(xs):\n    return sorted(xs)",
+      "def sort_numbers(xs):\n    return sorted(xs, reverse=True)",
+      "def sort_numbers(xs):\n    return list(xs)"
+    ],
+    "reference_code": "def sort_numbers(xs):\n    return sorted(xs)",
+    "evaluation_inputs": [
+      {
+        "xs": [
+          -4,
+          1,
+          -2,
+          3
+        ]
+      },
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          2,
+          2,
+          1
+        ]
+      },
+      {
+        "xs": [
+          3,
+          2,
+          1
+        ]
+      },
+      {
+        "xs": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_SORTING_04",
+    "source": "synthetic-controlled",
+    "family": "sorting",
+    "variant": 1,
+    "description": "Sort a list of integers; the requested direction is not specified.",
+    "function_name": "sort_numbers",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          4,
+          2,
+          8,
+          6
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def sort_numbers(xs):\n    return sorted(xs)",
+      "def sort_numbers(xs):\n    return sorted(xs, reverse=True)",
+      "def sort_numbers(xs):\n    return list(xs)"
+    ],
+    "reference_code": "def sort_numbers(xs):\n    return sorted(xs, reverse=True)",
+    "evaluation_inputs": [
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          2,
+          2,
+          1
+        ]
+      },
+      {
+        "xs": [
+          3,
+          2,
+          1
+        ]
+      },
+      {
+        "xs": [
+          0
+        ]
+      },
+      {
+        "xs": [
+          -4,
+          1,
+          -2,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_INTERSECTION_01",
+    "source": "synthetic-controlled",
+    "family": "intersection",
+    "variant": 0,
+    "description": "Return the common elements of two sequences; the output order and duplicate policy are ambiguous.",
+    "function_name": "common_elements",
+    "params": "a, b",
+    "seed_inputs": [
+      {
+        "a": [
+          4,
+          1,
+          4,
+          2,
+          3
+        ],
+        "b": [
+          4,
+          3,
+          5
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def common_elements(a, b):\n    return sorted(set(a) & set(b))",
+      "def common_elements(a, b):\n    return [x for x in a if x in b]",
+      "def common_elements(a, b):\n    return list(set(a) & set(b))"
+    ],
+    "reference_code": "def common_elements(a, b):\n    return sorted(set(a) & set(b))",
+    "evaluation_inputs": [
+      {
+        "a": [
+          3,
+          1,
+          3,
+          2
+        ],
+        "b": [
+          1,
+          3
+        ]
+      },
+      {
+        "a": [],
+        "b": [
+          1
+        ]
+      },
+      {
+        "a": [
+          4,
+          4
+        ],
+        "b": [
+          4
+        ]
+      },
+      {
+        "a": [
+          5,
+          2,
+          1
+        ],
+        "b": [
+          1,
+          2
+        ]
+      },
+      {
+        "a": [
+          7,
+          4,
+          7,
+          2
+        ],
+        "b": [
+          2,
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_INTERSECTION_02",
+    "source": "synthetic-controlled",
+    "family": "intersection",
+    "variant": 1,
+    "description": "Return the common elements of two sequences; the output order and duplicate policy are ambiguous.",
+    "function_name": "common_elements",
+    "params": "a, b",
+    "seed_inputs": [
+      {
+        "a": [
+          3,
+          2,
+          3,
+          1
+        ],
+        "b": [
+          1,
+          3
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def common_elements(a, b):\n    return sorted(set(a) & set(b))",
+      "def common_elements(a, b):\n    return [x for x in a if x in b]",
+      "def common_elements(a, b):\n    return list(set(a) & set(b))"
+    ],
+    "reference_code": "def common_elements(a, b):\n    return [x for x in a if x in b]",
+    "evaluation_inputs": [
+      {
+        "a": [],
+        "b": [
+          1
+        ]
+      },
+      {
+        "a": [
+          4,
+          4
+        ],
+        "b": [
+          4
+        ]
+      },
+      {
+        "a": [
+          5,
+          2,
+          1
+        ],
+        "b": [
+          1,
+          2
+        ]
+      },
+      {
+        "a": [
+          7,
+          4,
+          7,
+          2
+        ],
+        "b": [
+          2,
+          4
+        ]
+      },
+      {
+        "a": [
+          3,
+          1,
+          3,
+          2
+        ],
+        "b": [
+          1,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_INTERSECTION_03",
+    "source": "synthetic-controlled",
+    "family": "intersection",
+    "variant": 0,
+    "description": "Return the common elements of two sequences; the output order and duplicate policy are ambiguous.",
+    "function_name": "common_elements",
+    "params": "a, b",
+    "seed_inputs": [
+      {
+        "a": [
+          7,
+          4,
+          7,
+          2,
+          4
+        ],
+        "b": [
+          2,
+          7
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def common_elements(a, b):\n    return sorted(set(a) & set(b))",
+      "def common_elements(a, b):\n    return [x for x in a if x in b]",
+      "def common_elements(a, b):\n    return list(set(a) & set(b))"
+    ],
+    "reference_code": "def common_elements(a, b):\n    return sorted(set(a) & set(b))",
+    "evaluation_inputs": [
+      {
+        "a": [
+          4,
+          4
+        ],
+        "b": [
+          4
+        ]
+      },
+      {
+        "a": [
+          5,
+          2,
+          1
+        ],
+        "b": [
+          1,
+          2
+        ]
+      },
+      {
+        "a": [
+          7,
+          4,
+          7,
+          2
+        ],
+        "b": [
+          2,
+          4
+        ]
+      },
+      {
+        "a": [
+          3,
+          1,
+          3,
+          2
+        ],
+        "b": [
+          1,
+          3
+        ]
+      },
+      {
+        "a": [],
+        "b": [
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_INTERSECTION_04",
+    "source": "synthetic-controlled",
+    "family": "intersection",
+    "variant": 1,
+    "description": "Return the common elements of two sequences; the output order and duplicate policy are ambiguous.",
+    "function_name": "common_elements",
+    "params": "a, b",
+    "seed_inputs": [
+      {
+        "a": [
+          9,
+          2,
+          9,
+          5,
+          2
+        ],
+        "b": [
+          5,
+          9
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def common_elements(a, b):\n    return sorted(set(a) & set(b))",
+      "def common_elements(a, b):\n    return [x for x in a if x in b]",
+      "def common_elements(a, b):\n    return list(set(a) & set(b))"
+    ],
+    "reference_code": "def common_elements(a, b):\n    return [x for x in a if x in b]",
+    "evaluation_inputs": [
+      {
+        "a": [
+          5,
+          2,
+          1
+        ],
+        "b": [
+          1,
+          2
+        ]
+      },
+      {
+        "a": [
+          7,
+          4,
+          7,
+          2
+        ],
+        "b": [
+          2,
+          4
+        ]
+      },
+      {
+        "a": [
+          3,
+          1,
+          3,
+          2
+        ],
+        "b": [
+          1,
+          3
+        ]
+      },
+      {
+        "a": [],
+        "b": [
+          1
+        ]
+      },
+      {
+        "a": [
+          4,
+          4
+        ],
+        "b": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_PARITY_01",
+    "source": "synthetic-controlled",
+    "family": "parity",
+    "variant": 0,
+    "description": "Select numbers according to a parity rule that requires clarification.",
+    "function_name": "select_numbers",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def select_numbers(xs):\n    return [x for x in xs if x % 2 == 0]",
+      "def select_numbers(xs):\n    return [x for x in xs if x % 2 != 0]",
+      "def select_numbers(xs):\n    return list(xs)"
+    ],
+    "reference_code": "def select_numbers(xs):\n    return [x for x in xs if x % 2 == 0]",
+    "evaluation_inputs": [
+      {
+        "xs": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          0
+        ]
+      },
+      {
+        "xs": [
+          -3,
+          -2,
+          1,
+          2
+        ]
+      },
+      {
+        "xs": [
+          11,
+          12,
+          13
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_PARITY_02",
+    "source": "synthetic-controlled",
+    "family": "parity",
+    "variant": 1,
+    "description": "Select numbers according to a parity rule that requires clarification.",
+    "function_name": "select_numbers",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          0,
+          1,
+          7,
+          8
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def select_numbers(xs):\n    return [x for x in xs if x % 2 == 0]",
+      "def select_numbers(xs):\n    return [x for x in xs if x % 2 != 0]",
+      "def select_numbers(xs):\n    return list(xs)"
+    ],
+    "reference_code": "def select_numbers(xs):\n    return [x for x in xs if x % 2 != 0]",
+    "evaluation_inputs": [
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          0
+        ]
+      },
+      {
+        "xs": [
+          -3,
+          -2,
+          1,
+          2
+        ]
+      },
+      {
+        "xs": [
+          11,
+          12,
+          13
+        ]
+      },
+      {
+        "xs": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_PARITY_03",
+    "source": "synthetic-controlled",
+    "family": "parity",
+    "variant": 0,
+    "description": "Select numbers according to a parity rule that requires clarification.",
+    "function_name": "select_numbers",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          -3,
+          -2,
+          -1,
+          0
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def select_numbers(xs):\n    return [x for x in xs if x % 2 == 0]",
+      "def select_numbers(xs):\n    return [x for x in xs if x % 2 != 0]",
+      "def select_numbers(xs):\n    return list(xs)"
+    ],
+    "reference_code": "def select_numbers(xs):\n    return [x for x in xs if x % 2 == 0]",
+    "evaluation_inputs": [
+      {
+        "xs": [
+          0
+        ]
+      },
+      {
+        "xs": [
+          -3,
+          -2,
+          1,
+          2
+        ]
+      },
+      {
+        "xs": [
+          11,
+          12,
+          13
+        ]
+      },
+      {
+        "xs": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "xs": []
+      }
+    ]
+  },
+  {
+    "id": "SYN_PARITY_04",
+    "source": "synthetic-controlled",
+    "family": "parity",
+    "variant": 1,
+    "description": "Select numbers according to a parity rule that requires clarification.",
+    "function_name": "select_numbers",
+    "params": "xs",
+    "seed_inputs": [
+      {
+        "xs": [
+          9,
+          8,
+          7,
+          6
+        ]
+      }
+    ],
+    "candidate_codes": [
+      "def select_numbers(xs):\n    return [x for x in xs if x % 2 == 0]",
+      "def select_numbers(xs):\n    return [x for x in xs if x % 2 != 0]",
+      "def select_numbers(xs):\n    return list(xs)"
+    ],
+    "reference_code": "def select_numbers(xs):\n    return [x for x in xs if x % 2 != 0]",
+    "evaluation_inputs": [
+      {
+        "xs": [
+          -3,
+          -2,
+          1,
+          2
+        ]
+      },
+      {
+        "xs": [
+          11,
+          12,
+          13
+        ]
+      },
+      {
+        "xs": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "xs": []
+      },
+      {
+        "xs": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SYN_CASE_01",
+    "source": "synthetic-controlled",
+    "family": "case",
+    "variant": 0,
+    "description": "Normalize the letter case of an input string without specifying which case.",
+    "function_name": "normalize_text",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "AbC"
+      }
+    ],
+    "candidate_codes": [
+      "def normalize_text(s):\n    return s.lower()",
+      "def normalize_text(s):\n    return s.upper()",
+      "def normalize_text(s):\n    return s"
+    ],
+    "reference_code": "def normalize_text(s):\n    return s.lower()",
+    "evaluation_inputs": [
+      {
+        "s": "TeSt"
+      },
+      {
+        "s": ""
+      },
+      {
+        "s": "hello"
+      },
+      {
+        "s": "HELLO"
+      },
+      {
+        "s": "A b C"
+      }
+    ]
+  },
+  {
+    "id": "SYN_CASE_02",
+    "source": "synthetic-controlled",
+    "family": "case",
+    "variant": 1,
+    "description": "Normalize the letter case of an input string without specifying which case.",
+    "function_name": "normalize_text",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "MiXeD"
+      }
+    ],
+    "candidate_codes": [
+      "def normalize_text(s):\n    return s.lower()",
+      "def normalize_text(s):\n    return s.upper()",
+      "def normalize_text(s):\n    return s"
+    ],
+    "reference_code": "def normalize_text(s):\n    return s.upper()",
+    "evaluation_inputs": [
+      {
+        "s": ""
+      },
+      {
+        "s": "hello"
+      },
+      {
+        "s": "HELLO"
+      },
+      {
+        "s": "A b C"
+      },
+      {
+        "s": "TeSt"
+      }
+    ]
+  },
+  {
+    "id": "SYN_CASE_03",
+    "source": "synthetic-controlled",
+    "family": "case",
+    "variant": 0,
+    "description": "Normalize the letter case of an input string without specifying which case.",
+    "function_name": "normalize_text",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "Hello World"
+      }
+    ],
+    "candidate_codes": [
+      "def normalize_text(s):\n    return s.lower()",
+      "def normalize_text(s):\n    return s.upper()",
+      "def normalize_text(s):\n    return s"
+    ],
+    "reference_code": "def normalize_text(s):\n    return s.lower()",
+    "evaluation_inputs": [
+      {
+        "s": "hello"
+      },
+      {
+        "s": "HELLO"
+      },
+      {
+        "s": "A b C"
+      },
+      {
+        "s": "TeSt"
+      },
+      {
+        "s": ""
+      }
+    ]
+  },
+  {
+    "id": "SYN_CASE_04",
+    "source": "synthetic-controlled",
+    "family": "case",
+    "variant": 1,
+    "description": "Normalize the letter case of an input string without specifying which case.",
+    "function_name": "normalize_text",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "aBcD"
+      }
+    ],
+    "candidate_codes": [
+      "def normalize_text(s):\n    return s.lower()",
+      "def normalize_text(s):\n    return s.upper()",
+      "def normalize_text(s):\n    return s"
+    ],
+    "reference_code": "def normalize_text(s):\n    return s.upper()",
+    "evaluation_inputs": [
+      {
+        "s": "HELLO"
+      },
+      {
+        "s": "A b C"
+      },
+      {
+        "s": "TeSt"
+      },
+      {
+        "s": ""
+      },
+      {
+        "s": "hello"
+      }
+    ]
+  },
+  {
+    "id": "SYN_TRIM_01",
+    "source": "synthetic-controlled",
+    "family": "trim",
+    "variant": 0,
+    "description": "Clean whitespace around text; it is unclear which whitespace should be removed.",
+    "function_name": "clean_text",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "  Hello  "
+      }
+    ],
+    "candidate_codes": [
+      "def clean_text(s):\n    return s.strip()",
+      "def clean_text(s):\n    return s.lstrip()",
+      "def clean_text(s):\n    return s.rstrip()"
+    ],
+    "reference_code": "def clean_text(s):\n    return s.strip()",
+    "evaluation_inputs": [
+      {
+        "s": "  x  "
+      },
+      {
+        "s": " a"
+      },
+      {
+        "s": "b "
+      },
+      {
+        "s": "\t foo \n"
+      },
+      {
+        "s": ""
+      }
+    ]
+  },
+  {
+    "id": "SYN_TRIM_02",
+    "source": "synthetic-controlled",
+    "family": "trim",
+    "variant": 1,
+    "description": "Clean whitespace around text; it is unclear which whitespace should be removed.",
+    "function_name": "clean_text",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "\tApple\n"
+      }
+    ],
+    "candidate_codes": [
+      "def clean_text(s):\n    return s.strip()",
+      "def clean_text(s):\n    return s.lstrip()",
+      "def clean_text(s):\n    return s.rstrip()"
+    ],
+    "reference_code": "def clean_text(s):\n    return s.lstrip()",
+    "evaluation_inputs": [
+      {
+        "s": " a"
+      },
+      {
+        "s": "b "
+      },
+      {
+        "s": "\t foo \n"
+      },
+      {
+        "s": ""
+      },
+      {
+        "s": "  x  "
+      }
+    ]
+  },
+  {
+    "id": "SYN_TRIM_03",
+    "source": "synthetic-controlled",
+    "family": "trim",
+    "variant": 0,
+    "description": "Clean whitespace around text; it is unclear which whitespace should be removed.",
+    "function_name": "clean_text",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "  World "
+      }
+    ],
+    "candidate_codes": [
+      "def clean_text(s):\n    return s.strip()",
+      "def clean_text(s):\n    return s.lstrip()",
+      "def clean_text(s):\n    return s.rstrip()"
+    ],
+    "reference_code": "def clean_text(s):\n    return s.strip()",
+    "evaluation_inputs": [
+      {
+        "s": "b "
+      },
+      {
+        "s": "\t foo \n"
+      },
+      {
+        "s": ""
+      },
+      {
+        "s": "  x  "
+      },
+      {
+        "s": " a"
+      }
+    ]
+  },
+  {
+    "id": "SYN_TRIM_04",
+    "source": "synthetic-controlled",
+    "family": "trim",
+    "variant": 1,
+    "description": "Clean whitespace around text; it is unclear which whitespace should be removed.",
+    "function_name": "clean_text",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "\nHi\t"
+      }
+    ],
+    "candidate_codes": [
+      "def clean_text(s):\n    return s.strip()",
+      "def clean_text(s):\n    return s.lstrip()",
+      "def clean_text(s):\n    return s.rstrip()"
+    ],
+    "reference_code": "def clean_text(s):\n    return s.lstrip()",
+    "evaluation_inputs": [
+      {
+        "s": "\t foo \n"
+      },
+      {
+        "s": ""
+      },
+      {
+        "s": "  x  "
+      },
+      {
+        "s": " a"
+      },
+      {
+        "s": "b "
+      }
+    ]
+  },
+  {
+    "id": "SYN_THRESHOLD_01",
+    "source": "synthetic-controlled",
+    "family": "threshold",
+    "variant": 0,
+    "description": "Check whether a value passes a threshold; endpoint inclusion is unspecified.",
+    "function_name": "is_large",
+    "params": "x, threshold",
+    "seed_inputs": [
+      {
+        "x": 3,
+        "threshold": 3
+      }
+    ],
+    "candidate_codes": [
+      "def is_large(x, threshold):\n    return x > threshold",
+      "def is_large(x, threshold):\n    return x >= threshold",
+      "def is_large(x, threshold):\n    return x < threshold"
+    ],
+    "reference_code": "def is_large(x, threshold):\n    return x > threshold",
+    "evaluation_inputs": [
+      {
+        "x": 0,
+        "threshold": 0
+      },
+      {
+        "x": 1,
+        "threshold": 0
+      },
+      {
+        "x": -1,
+        "threshold": 0
+      },
+      {
+        "x": 8,
+        "threshold": 9
+      },
+      {
+        "x": 3,
+        "threshold": 3
+      }
+    ]
+  },
+  {
+    "id": "SYN_THRESHOLD_02",
+    "source": "synthetic-controlled",
+    "family": "threshold",
+    "variant": 1,
+    "description": "Check whether a value passes a threshold; endpoint inclusion is unspecified.",
+    "function_name": "is_large",
+    "params": "x, threshold",
+    "seed_inputs": [
+      {
+        "x": 1,
+        "threshold": 1
+      }
+    ],
+    "candidate_codes": [
+      "def is_large(x, threshold):\n    return x > threshold",
+      "def is_large(x, threshold):\n    return x >= threshold",
+      "def is_large(x, threshold):\n    return x < threshold"
+    ],
+    "reference_code": "def is_large(x, threshold):\n    return x >= threshold",
+    "evaluation_inputs": [
+      {
+        "x": 1,
+        "threshold": 0
+      },
+      {
+        "x": -1,
+        "threshold": 0
+      },
+      {
+        "x": 8,
+        "threshold": 9
+      },
+      {
+        "x": 3,
+        "threshold": 3
+      },
+      {
+        "x": 0,
+        "threshold": 0
+      }
+    ]
+  },
+  {
+    "id": "SYN_THRESHOLD_03",
+    "source": "synthetic-controlled",
+    "family": "threshold",
+    "variant": 0,
+    "description": "Check whether a value passes a threshold; endpoint inclusion is unspecified.",
+    "function_name": "is_large",
+    "params": "x, threshold",
+    "seed_inputs": [
+      {
+        "x": -2,
+        "threshold": -2
+      }
+    ],
+    "candidate_codes": [
+      "def is_large(x, threshold):\n    return x > threshold",
+      "def is_large(x, threshold):\n    return x >= threshold",
+      "def is_large(x, threshold):\n    return x < threshold"
+    ],
+    "reference_code": "def is_large(x, threshold):\n    return x > threshold",
+    "evaluation_inputs": [
+      {
+        "x": -1,
+        "threshold": 0
+      },
+      {
+        "x": 8,
+        "threshold": 9
+      },
+      {
+        "x": 3,
+        "threshold": 3
+      },
+      {
+        "x": 0,
+        "threshold": 0
+      },
+      {
+        "x": 1,
+        "threshold": 0
+      }
+    ]
+  },
+  {
+    "id": "SYN_THRESHOLD_04",
+    "source": "synthetic-controlled",
+    "family": "threshold",
+    "variant": 1,
+    "description": "Check whether a value passes a threshold; endpoint inclusion is unspecified.",
+    "function_name": "is_large",
+    "params": "x, threshold",
+    "seed_inputs": [
+      {
+        "x": 0,
+        "threshold": 0
+      }
+    ],
+    "candidate_codes": [
+      "def is_large(x, threshold):\n    return x > threshold",
+      "def is_large(x, threshold):\n    return x >= threshold",
+      "def is_large(x, threshold):\n    return x < threshold"
+    ],
+    "reference_code": "def is_large(x, threshold):\n    return x >= threshold",
+    "evaluation_inputs": [
+      {
+        "x": 8,
+        "threshold": 9
+      },
+      {
+        "x": 3,
+        "threshold": 3
+      },
+      {
+        "x": 0,
+        "threshold": 0
+      },
+      {
+        "x": 1,
+        "threshold": 0
+      },
+      {
+        "x": -1,
+        "threshold": 0
+      }
+    ]
+  },
+  {
+    "id": "SYN_PALINDROME_01",
+    "source": "synthetic-controlled",
+    "family": "palindrome",
+    "variant": 0,
+    "description": "Determine whether a string is a palindrome; matching case may or may not matter.",
+    "function_name": "is_palindrome",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "Aa"
+      }
+    ],
+    "candidate_codes": [
+      "def is_palindrome(s):\n    return s == s[::-1]",
+      "def is_palindrome(s):\n    return s.lower() == s.lower()[::-1]",
+      "def is_palindrome(s):\n    return False"
+    ],
+    "reference_code": "def is_palindrome(s):\n    return s == s[::-1]",
+    "evaluation_inputs": [
+      {
+        "s": "Aa"
+      },
+      {
+        "s": "aba"
+      },
+      {
+        "s": "AbBa"
+      },
+      {
+        "s": "abcd"
+      },
+      {
+        "s": ""
+      }
+    ]
+  },
+  {
+    "id": "SYN_PALINDROME_02",
+    "source": "synthetic-controlled",
+    "family": "palindrome",
+    "variant": 1,
+    "description": "Determine whether a string is a palindrome; matching case may or may not matter.",
+    "function_name": "is_palindrome",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "aBa"
+      }
+    ],
+    "candidate_codes": [
+      "def is_palindrome(s):\n    return s == s[::-1]",
+      "def is_palindrome(s):\n    return s.lower() == s.lower()[::-1]",
+      "def is_palindrome(s):\n    return False"
+    ],
+    "reference_code": "def is_palindrome(s):\n    return s.lower() == s.lower()[::-1]",
+    "evaluation_inputs": [
+      {
+        "s": "aba"
+      },
+      {
+        "s": "AbBa"
+      },
+      {
+        "s": "abcd"
+      },
+      {
+        "s": ""
+      },
+      {
+        "s": "Aa"
+      }
+    ]
+  },
+  {
+    "id": "SYN_PALINDROME_03",
+    "source": "synthetic-controlled",
+    "family": "palindrome",
+    "variant": 0,
+    "description": "Determine whether a string is a palindrome; matching case may or may not matter.",
+    "function_name": "is_palindrome",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "AbBa"
+      }
+    ],
+    "candidate_codes": [
+      "def is_palindrome(s):\n    return s == s[::-1]",
+      "def is_palindrome(s):\n    return s.lower() == s.lower()[::-1]",
+      "def is_palindrome(s):\n    return False"
+    ],
+    "reference_code": "def is_palindrome(s):\n    return s == s[::-1]",
+    "evaluation_inputs": [
+      {
+        "s": "AbBa"
+      },
+      {
+        "s": "abcd"
+      },
+      {
+        "s": ""
+      },
+      {
+        "s": "Aa"
+      },
+      {
+        "s": "aba"
+      }
+    ]
+  },
+  {
+    "id": "SYN_PALINDROME_04",
+    "source": "synthetic-controlled",
+    "family": "palindrome",
+    "variant": 1,
+    "description": "Determine whether a string is a palindrome; matching case may or may not matter.",
+    "function_name": "is_palindrome",
+    "params": "s",
+    "seed_inputs": [
+      {
+        "s": "aA"
+      }
+    ],
+    "candidate_codes": [
+      "def is_palindrome(s):\n    return s == s[::-1]",
+      "def is_palindrome(s):\n    return s.lower() == s.lower()[::-1]",
+      "def is_palindrome(s):\n    return False"
+    ],
+    "reference_code": "def is_palindrome(s):\n    return s.lower() == s.lower()[::-1]",
+    "evaluation_inputs": [
+      {
+        "s": "abcd"
+      },
+      {
+        "s": ""
+      },
+      {
+        "s": "Aa"
+      },
+      {
+        "s": "aba"
+      },
+      {
+        "s": "AbBa"
+      }
+    ]
+  }
+]
