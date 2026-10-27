@@ -104,6 +104,13 @@ Bằng chứng được lưu tại [evidence/2026-10-28](evidence/2026-10-28/):
 
 ## 6. Việc còn lại trước khi nộp
 
+**Trạng thái đồng bộ 28/10:** hai nhánh đã được merge vào `main` cục bộ. Lần push
+bằng Git không thực hiện được vì máy chưa có thông tin đăng nhập. Kết nối GitHub
+trong ứng dụng đọc được repository nhưng API ghi tree trả `403: Resource not
+accessible by integration`; không có cập nhật remote nào từ lần tích hợp này.
+Sau khi đăng nhập Git đúng tài khoản có quyền ghi, chạy `git push origin main`
+từ thư mục gốc. Nếu remote có commit mới, fetch và đối chiếu trước; không force push.
+
 Ưu tiên một phiên LLM thật, pilot nhỏ, phân tích lỗi và báo cáo. Kiểm tra model
 hiện có trong tài khoản; không coi default model trong nhánh là đã được xác minh.
 Tài liệu phase 1 vẫn chứa mục tiêu kỳ vọng và mô tả CoT cần chỉnh trong báo cáo cuối.
