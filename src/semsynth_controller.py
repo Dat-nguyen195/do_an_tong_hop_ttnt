@@ -19,6 +19,7 @@ class SEMSYNTHConfig:
     answer_error_rate: float = 0.10
     posterior_threshold: float = 0.95
     semantic_questions: bool = False
+    explain_questions: bool = False  # Trace only; never changes decision rules
     enable_execution_cache: bool = True
     selection_strategy: str = "balanced"
     selection_seed: int = 0
@@ -114,6 +115,19 @@ class SEMSYNTHController:
             except TypeError:
                 answer = bool(answer_callback(question.question))
             before = self.candidate_manager.active_count
+            prior = {str(c.index): round(c.score, 10) for c in active}
+            predictive_yes = sum(c.score for c in active if c.index in question.yes_candidate_ids)
+            predictive_total = sum(c.score for c in active)
+            if predictive_total > 0:
+                predictive_yes /= predictive_total
+            else:
+                predictive_yes = len(question.yes_candidate_ids) / len(active)
+            likelihood = (
+                self.config.answer_error_rate +
+                (1 - 2 * self.config.answer_error_rate) *
+                (predictive_yes if answer else 1 - predictive_yes)
+                if self.config.belief_mode == "soft" else None
+            )
             if self.config.belief_mode == "soft":
                 yes_ids = set(question.yes_candidate_ids)
                 eps = self.config.answer_error_rate
@@ -133,8 +147,9 @@ class SEMSYNTHController:
                     yes_candidate_ids=question.yes_candidate_ids,
                     no_candidate_ids=question.no_candidate_ids,
                 )
-            transcript.append({
+            event = {
                 "question": question.question,
+                "question_type": question.question_type,
                 "answer": answer,
                 "test_input": question.test_input,
                 "yes_candidate_ids": question.yes_candidate_ids,
@@ -146,7 +161,23 @@ class SEMSYNTHController:
                 "candidates_after": self.candidate_manager.active_count,
                 "posterior_max": round(self.candidate_manager.get_best().score, 8)
                 if self.config.belief_mode == "soft" else None,
-            })
+            }
+            if self.config.explain_questions:
+                event["explanation"] = question.explanation
+                event["belief_before"] = prior
+                event["belief_after"] = {
+                    str(c.index): round(c.score, 10)
+                    for c in self.candidate_manager.get_active()
+                }
+                event["answer_predictive_likelihood"] = (
+                    round(likelihood, 8) if likelihood is not None else None
+                )
+                # An improbable answer signals a need to check evidence; it is
+                # NOT automatically a contradiction and must not be discarded.
+                event["needs_answer_review"] = bool(
+                    likelihood is not None and likelihood < 0.20
+                )
+            transcript.append(event)
             if removed == 0 and self.config.belief_mode == "hard":
                 termination_reason = "non_discriminating_answer"
                 break
@@ -182,6 +213,7 @@ class SEMSYNTHController:
                 "termination_reason": termination_reason,
                 "belief_mode": self.config.belief_mode,
                 "semantic_questions": self.config.semantic_questions,
+                "explain_questions": self.config.explain_questions,
                 "posterior": {str(c.index): round(c.score, 8) for c in self.candidate_manager.get_active()}
                 if self.config.belief_mode == "soft" else None,
                 "rejected_candidates": rejected,

@@ -1,42 +1,16 @@
-# SEMSYNTH: Kaggle one-cell execution
+# SEMSYNTH Kaggle — one cell + manual Gemini key
 
-The **recommended notebook** is [`KAGGLE_ONE_CELL.ipynb`](KAGGLE_ONE_CELL.ipynb).
+1. Create a Kaggle notebook and turn **Internet ON** (Accelerator: None).
+2. Upload both the **original** `do_an_tong_hop_ttnt-tydeptrai.zip` and this **changes-only** `SEMSYNTH_KAGGLE_EXPLAIN_PATCH.zip` as Kaggle inputs. Alternatively, set `REPO_URL` to an updated GitHub repo and optionally attach the patch ZIP.
+3. Open `notebooks/KAGGLE_ONE_CELL.ipynb` (or paste the single code cell in `KAGGLE_PASTE_ONE_CELL.py`).
+4. Type the Gemini API key when prompted (hidden input). You can instead assign `GEMINI_API_KEY = "..."` at the top, but then the notebook source contains your secret.
+5. Keep `PROFILE = "pilot"` (eight tasks / eight template families) for the first real API run. Set `PROFILE = "smoke"` for a one-task connectivity check, or `PROFILE = "full"` to run the full 32-case synthetic benchmark. Keep the same profile/model/settings for checkpoint resume.
+6. Download `/kaggle/working/SEMSYNTH_RESULTS.zip` from Kaggle Outputs. The archive includes `summary.csv`, `per_task.csv`, `runtime.csv`, `explanations.jsonl`, `runs.jsonl`, `manifest.json`, and `completeness.json`.
 
-1. Push the contents of the **patch ZIP** over the same paths in your original GitHub repository. Keep all original unmodified files.
-2. In Kaggle, enable **Internet** (required for GitHub clone), add a notebook, and paste the one code cell from `KAGGLE_ONE_CELL.ipynb`.
-3. Set `REPO_URL` to your GitHub repository. The notebook installs the minimal dependencies, runs the automated tests, checks the environment, executes the experiment and writes `SEMSYNTH_RESULTS.zip` under `/kaggle/working/semsynth_results/<run-id>/`.
-4. The default `MODE="offline"` needs **no API key, no GPU, and no training**. It runs **32 controlled synthetic task instances from eight template families**. These are correctness regressions, **not real-LLM efficacy claims**.
-5. To use real candidate generation, set `MODE="real"`, enable Internet, set the `GEMINI_API_KEY` Kaggle Secret (or another supported provider secret), and set `MODEL` only if needed. Cloud provider availability/quotas have not been tested in this patch.
-6. If Kaggle interrupts the run, execute the same notebook again with the same settings and retained `/kaggle/working` output. Completed task-method checkpoints are skipped. For a *new* Kaggle session, attach prior results and copy the matching run-id directory into the output folder first.
+**Scope:** `proposed_explain` uses exactly the same question selection and Bayesian updates as `proposed`. Only the grounded explanation and decision trace are added. The clarity benefit cannot be established scientifically without a user study.
 
-## Parallel, nonoverlapping Kaggle sessions
+**Fairness:** The benchmark's reference code is used for simulated user responses and evaluation, never Gemini's prompts. The 32 cases belong to eight synthetic families. `oracle_upper_bound` is not a deployable baseline.
 
-Set `NUM_SHARDS=2, SHARD_INDEX=0` in session A and `NUM_SHARDS=2, SHARD_INDEX=1` in session B. **Each session is independent**: it does not wait for the other or require shared storage. Both must use identical experiment settings and repository revision. Download their `SEMSYNTH_RESULTS.zip` files, then merge them locally with:
+**API limits:** Calls to Gemini require external access, account permissions, and sufficient usage quota. A local patch check cannot guarantee those. The notebook does not silently switch from live Gemini to mocked generations.
 
-```bash
-python scripts/merge_shards.py shard0.zip shard1.zip --output-dir results/merged
-```
-
-Do not interpret a partial shard's `pass_rate_on_completed` as a full-benchmark comparison. Check `completeness.json` for `all_complete: true` after merging.
-
-## Commands without notebook
-
-```bash
-python -m pip install -r requirements-kaggle.txt
-python -m pytest -q
-python scripts/preflight.py --mode offline
-python run_experiments.py --quick
-python run_experiments.py --seed 3101 --max-minutes 600
-python run_experiments.py --seed 3101 --num-shards 2 --shard-index 0
-python run_experiments.py --seed 3101 --num-shards 2 --shard-index 1
-```
-
-The six methods are `direct1`, `first_valid`, `random`, `balanced`, `proposed`, and `oracle_upper_bound`. The oracle upper bound uses hidden evaluation outcomes to choose a candidate and is **not a deployable baseline**. All other methods share the same candidate pool per task, with held-out evaluation occurring only after selection.
-
-## What is and is not measured
-
-- `passed_all` is the separate held-out input test result. The controller's backward-compatible `success` means **a candidate exists**, not that it is correct.
-- `proposed` enables semantic questions where execution justifies the wording plus probabilistic belief updates. Unknown/noisy responses are not human-evaluated in the offline data.
-- `--simulated-flip-rate 0.1` is an optional error-injection stress test; it cannot simulate all human misunderstandings.
-- Cached execution assumes deterministic pure functions, and process isolation is **not** a hardened security sandbox. Do not run arbitrary hostile code on public infrastructure.
-- The 32 cases share only eight underlying templates. They are primarily a reproducible **software regression** benchmark; stronger empirical claims require genuinely independent tasks, rigorous annotation, human subjects, and real LLM repetitions.
+**Checkpointing:** Re-running within a Kaggle session keeps `/kaggle/working/semsynth_results`, and completed task-method records are reused. Download results before closing the session. A fully fresh Kaggle session has no saved checkpoints unless you restore them.

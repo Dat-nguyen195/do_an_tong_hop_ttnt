@@ -48,7 +48,7 @@ class LLMClient:
         model: str | None = None,
         api_key: str | None = None,
         temperature: float = 0.0,
-        max_tokens: int = 1024,
+        max_tokens: int = 4096,
     ):
         self.provider = (provider or os.getenv("LLM_PROVIDER", "openai")).lower()
         if self.provider not in SUPPORTED_PROVIDERS:
@@ -172,7 +172,10 @@ class LLMClient:
             system_message=system_prompt,
             temperature=self.temperature if temperature is None else temperature,
         )
-        return self._extract_code(raw)
+        code = self._extract_code(raw)
+        if not code:
+            raise RuntimeError("Empty model response (try increasing max_output_tokens or checking model access)")
+        return code
 
     def generate_multiple(self, description: str, function_name: str, params: str = "", k: int = 5) -> list[str]:
         """Generate up to *k* candidates with real sampling diversity.
@@ -211,7 +214,8 @@ class LLMClient:
                 message = str(exc).lower()
                 retryable = any(s in message for s in (
                     "429", "500", "502", "503", "504", "timeout", "timed out",
-                    "temporarily", "rate limit", "service unavailable"))
+                    "temporarily", "rate limit", "service unavailable",
+                    "empty model response"))
                 if not retryable:
                     raise
                 last_error = exc

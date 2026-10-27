@@ -26,8 +26,8 @@ from src.semsynth_controller import SEMSYNTHConfig, SEMSYNTHController
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_DATASET = ROOT / 'config' / 'ambiguity_benchmark.json'
-METHODS = ('direct1', 'first_valid', 'random', 'balanced', 'proposed', 'oracle_upper_bound')
-REVISION = 'semsynth-kaggle-v1'
+METHODS = ('direct1', 'first_valid', 'random', 'balanced', 'proposed', 'proposed_explain', 'oracle_upper_bound')
+REVISION = 'semsynth-kaggle-explain-v2'
 
 
 def json_text(value: Any) -> str:
@@ -97,7 +97,7 @@ def task_pool(task: dict, args, root: Path) -> list[str]:
     else:
         llm = LLMClient(provider=args.provider, model=args.model)
         if not llm.is_configured:
-            raise ValueError(f'Missing API key for {args.provider}; add it to Kaggle Secrets')
+            raise ValueError(f'Missing API key for {args.provider}; enter it in the Kaggle notebook or set the environment variable')
         codes = llm.generate_multiple(task['description'], task['function_name'], task['params'], k=args.top_k)
     codes = list(dict.fromkeys(c.strip() for c in codes if c and c.strip()))
     atomic_json(path, {'run_id': root.name, 'task_id': task['id'], 'codes': codes,
@@ -143,10 +143,11 @@ def run_method(method: str, task: dict, pool: list[str], args,
         config = SEMSYNTHConfig(
             top_k=args.top_k, max_questions=args.max_questions,
             execution_timeout=args.timeout, max_probe_inputs=args.max_probes,
-            belief_mode='soft' if method == 'proposed' else 'hard',
+            belief_mode='soft' if method in {'proposed', 'proposed_explain'} else 'hard',
             answer_error_rate=args.answer_error_rate,
             posterior_threshold=args.posterior_threshold,
-            semantic_questions=(method == 'proposed'),
+            semantic_questions=(method in {'proposed', 'proposed_explain'}),
+            explain_questions=(method == 'proposed_explain'),
             enable_execution_cache=args.cache,
             selection_strategy='random' if method == 'random' else 'balanced',
             selection_seed=int(sha([args.seed, task['id'], method])[:8], 16),
@@ -183,8 +184,10 @@ def run_method(method: str, task: dict, pool: list[str], args,
         'executor_stats': (session.metadata['executor_stats'] if session else evaluator.stats),
         'session_status': session.metadata['selection_status'] if session else 'baseline',
         'termination_reason': session.metadata['termination_reason'] if session else 'baseline',
-        'semantic_question_count': sum(not q['question'].startswith('For input') for q in session.questions_asked)
+        'semantic_question_count': sum(q['question_type'] == 'semantic_example' for q in session.questions_asked)
                                    if session else 0,
+        'explanation_count': sum('explanation' in q for q in session.questions_asked) if session else 0,
+        'explanation_trace': session.questions_asked if session and method == 'proposed_explain' else [],
     }
 
 
@@ -218,7 +221,7 @@ def aggregate(output: Path, tasks: list[dict], methods: list[str], selected: lis
 
     fields = ['task_id','family','method','passed_all','pass_count','total_tests','candidate_count',
               'has_candidate','questions','flipped_answers','elapsed_s','session_status',
-              'termination_reason','semantic_question_count']
+              'termination_reason','semantic_question_count','explanation_count']
     with (output / 'per_task.csv').open('w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=fields, extrasaction='ignore'); w.writeheader(); w.writerows(records)
     runtime_fields=['task_id','method','elapsed_s','subprocess_calls','cache_hits','cache_misses']
@@ -232,6 +235,12 @@ def aggregate(output: Path, tasks: list[dict], methods: list[str], selected: lis
     with (output / 'runs.jsonl').open('w', encoding='utf-8') as f:
         for row in records:
             f.write(json_text(row)+'\n')
+    with (output / 'explanations.jsonl').open('w', encoding='utf-8') as f:
+        for row in records:
+            for index, event in enumerate(row.get('explanation_trace', []), start=1):
+                f.write(json_text({'task_id': row['task_id'], 'family': row['family'],
+                                   'method': row['method'], 'question_index': index,
+                                   **event}) + '\n')
     groups = []
     for method in methods:
         subset = [r for r in records if r['method'] == method]
@@ -295,7 +304,7 @@ def main(argv=None):
     if args.mode == 'real' and not args.aggregate_only:
         key={'gemini':'GEMINI_API_KEY','openai':'OPENAI_API_KEY','openrouter':'OPENROUTER_API_KEY'}[args.provider]
         if not os.environ.get(key):
-            p.error(f'Missing {key}: enable Internet and add the Kaggle Secret (not required for offline)')
+            p.error(f'Missing {key}: manually enter the key in your Kaggle cell (or set the environment variable)')
     tasks = validate_dataset(json.loads(args.dataset.read_text(encoding='utf-8')))
     if args.quick:
         seen=set(); reduced=[]
@@ -330,33 +339,50 @@ def main(argv=None):
     shard=[t for idx,t in enumerate(tasks) if idx % args.num_shards==args.shard_index]
     print(f'RUN {run_id} | mode={args.mode} | tasks={len(shard)}/{len(tasks)} | methods={methods}',flush=True)
     started=time.monotonic(); completed=0
-    if not args.aggregate_only:
-        for task in shard:
-            missing_methods=[m for m in methods if not ((output/'tasks'/f'{task["id"]}__{m}.json').exists() and args.resume)]
-            if not missing_methods:
-                print(f'SKIP {task["id"]}: checkpoint complete',flush=True)
-                continue
-            if args.max_minutes>0 and time.monotonic()-started>=args.max_minutes*60:
-                print('TIME BUDGET reached: saved completed task checkpoints',flush=True)
-                break
-            pool=task_pool(task,args,output)
-            ref_executor=CodeExecutor(timeout=args.timeout)
-            expected=[]
-            for ok,value,error in ref_executor.execute_batch(task['reference_code'],task['function_name'],task['evaluation_inputs']):
-                if not ok:
-                    raise RuntimeError(f'Broken reference for {task["id"]}: {error}')
-                expected.append(value)
-            for method in missing_methods:
-                result=run_method(method,task,pool,args,expected,ref_executor)
-                result['run_id']=run_id
-                atomic_json(output/'tasks'/f'{task["id"]}__{method}.json',result)
-                completed+=1
-                print(f'{task["id"]} {method}: {result["pass_count"]}/{result["total_tests"]} '
-                      f'questions={result["questions"]} sec={result["elapsed_s"]:.2f}',flush=True)
+    failure = None
+    failed_task_id = None
+    try:
+        if not args.aggregate_only:
+            for task in shard:
+                failed_task_id = task["id"]
+                missing_methods=[m for m in methods if not ((output/'tasks'/f'{task["id"]}__{m}.json').exists() and args.resume)]
+                if not missing_methods:
+                    print(f'SKIP {task["id"]}: checkpoint complete',flush=True)
+                    continue
+                if args.max_minutes>0 and time.monotonic()-started>=args.max_minutes*60:
+                    print('TIME BUDGET reached: saved completed task checkpoints',flush=True)
+                    break
+                pool=task_pool(task,args,output)
+                ref_executor=CodeExecutor(timeout=args.timeout)
+                expected=[]
+                for ok,value,error in ref_executor.execute_batch(task['reference_code'],task['function_name'],task['evaluation_inputs']):
+                    if not ok:
+                        raise RuntimeError(f'Broken reference for {task["id"]}: {error}')
+                    expected.append(value)
+                for method in missing_methods:
+                    result=run_method(method,task,pool,args,expected,ref_executor)
+                    result['run_id']=run_id
+                    atomic_json(output/'tasks'/f'{task["id"]}__{method}.json',result)
+                    completed+=1
+                    print(f'{task["id"]} {method}: {result["pass_count"]}/{result["total_tests"]} '
+                          f'questions={result["questions"]} sec={result["elapsed_s"]:.2f}',flush=True)
+    except Exception as exc:
+        failure = exc
+        atomic_json(output / 'run_error.json', {
+            'error_type': type(exc).__name__,
+            'failed_task_id': failed_task_id,
+            'checkpoint_status': 'partial (if any completed tasks exist)',
+            'error_message_omitted': 'Review Kaggle error output; no credentials are logged here',
+        })
+        print(f'RUN INTERRUPTED by {type(exc).__name__}; exporting saved checkpoints', flush=True)
+    if failure is None:
+        (output / 'run_error.json').unlink(missing_ok=True)
     status=aggregate(output,tasks,methods,shard,run_id)
     z=archive(output)
     print(json.dumps({k:v for k,v in status.items() if k not in ('missing','shard_missing')},indent=2))
     print(f'Archive: {z}\nNew task-method checkpoints: {completed}',flush=True)
+    if failure is not None:
+        raise RuntimeError(f'Experiment interrupted ({type(failure).__name__}); partial results have been archived: {z}') from failure
     if args.require_complete and not status['all_complete']:
         raise SystemExit(2)
     return status

@@ -28,6 +28,8 @@ class ClarificationQuestion:
     no_outputs: list[Any] = field(default_factory=list)
     info_gain: float = 0.0
     balance: float = 0.0
+    question_type: str = "io"
+    explanation: dict[str, Any] = field(default_factory=dict)
 
     @property
     def expected_outputs(self) -> dict[str, Any]:
@@ -220,7 +222,15 @@ class QuestionGenerator:
                 if not no_ids:
                     continue
                 phrasing = self._semantic_question(description, test_input, group["value"]) if semantic else None
-                prompt = phrasing or f"For input {test_input}, should the function return {group['value']!r}?"
+                # Semantic wording is explicitly scoped to the observed input.
+                # This prevents suggesting that a single probe proves a global
+                # property of all possible program inputs.
+                prompt = (
+                    f"On input {test_input!r}, {phrasing[0].lower() + phrasing[1:].rstrip('?')} "
+                    f"(observed output: {group['value']!r})?"
+                    if phrasing else
+                    f"For input {test_input}, should the function return {group['value']!r}?"
+                )
                 # Do not repeat an identical question, even across probe rounds.
                 if any(old.question == prompt for old in self._questions_asked):
                     continue
@@ -233,6 +243,22 @@ class QuestionGenerator:
                     no_outputs=[g["value"] for g in groups if g is not group],
                     info_gain=info_gain,
                     balance=balance,
+                    question_type="semantic_example" if phrasing else "io",
+                    explanation={
+                        "grounding": "Observed execution on the displayed input, not a universal proof",
+                        "input": test_input,
+                        "yes_output": group["value"],
+                        "alternative_outputs": [g["value"] for g in groups if g is not group],
+                        "yes_candidate_ids": yes_ids,
+                        "no_candidate_ids": no_ids,
+                        "why_asked": (
+                            "Candidates produced different outputs on this input. "
+                            "The selected Yes group yields the displayed result, "
+                            "while the No group contains the other observed behaviors."
+                        ),
+                        "selection_score_bits": round(info_gain, 8),
+                        "partition_balance": round(balance, 8),
+                    },
                 )
                 alternatives.append(q)
                 if best is None or (q.info_gain, q.balance) > (best.info_gain, best.balance):

@@ -24,7 +24,7 @@ def main():
     if args.mode == 'real':
         env={'gemini':'GEMINI_API_KEY','openai':'OPENAI_API_KEY','openrouter':'OPENROUTER_API_KEY'}[args.provider]
         if not os.environ.get(env):
-            p.error(f'{env} is missing; add it using Kaggle Secrets. Never print its value.')
+            p.error(f'{env} is missing; enter it in the Kaggle notebook or set the environment variable. Never print its value.')
         package = 'google.genai' if args.provider == 'gemini' else 'openai'
         if importlib.util.find_spec(package) is None:
             p.error(f'Missing {package}; install requirements-llm.txt')
