@@ -146,9 +146,10 @@ class CodeExecutor:
         try:
             with tempfile.TemporaryDirectory(prefix="semsynth_") as tmp:
                 proc = subprocess.run(
-                    [sys.executable, "-I", "-c", _RUNNER],
+                    [sys.executable, "-I", "-X", "utf8", "-c", _RUNNER],
                     input=payload,
                     text=True,
+                    encoding="utf-8",
                     capture_output=True,
                     cwd=tmp,
                     # Startup overhead can be substantial on oversubscribed
@@ -216,8 +217,8 @@ class CodeExecutor:
             try:
                 with tempfile.TemporaryDirectory(prefix="semsynth_batch_") as tmp:
                     proc = subprocess.run(
-                        [sys.executable, "-I", "-c", _BATCH_RUNNER], input=payload,
-                        text=True, capture_output=True, cwd=tmp,
+                        [sys.executable, "-I", "-X", "utf8", "-c", _BATCH_RUNNER], input=payload,
+                        text=True, encoding="utf-8", capture_output=True, cwd=tmp,
                         timeout=self.timeout * len(uncached) + 2.0, env={},
                     )
                 if proc.returncode:

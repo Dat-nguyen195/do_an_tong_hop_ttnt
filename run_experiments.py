@@ -21,13 +21,15 @@ from pathlib import Path
 from typing import Any
 
 from src.code_executor import CodeExecutor
+from src.candidate_manager import CandidateManager
 from src.llm_client import LLMClient
+from src.question_generator import QuestionGenerator
 from src.semsynth_controller import SEMSYNTHConfig, SEMSYNTHController
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_DATASET = ROOT / 'config' / 'ambiguity_benchmark.json'
 METHODS = ('direct1', 'first_valid', 'random', 'balanced', 'proposed', 'proposed_explain', 'oracle_upper_bound')
-REVISION = 'semsynth-kaggle-explain-v2'
+REVISION = 'semsynth-course-integration-v3'
 
 
 def json_text(value: Any) -> str:
@@ -83,6 +85,25 @@ def evaluate(code: str | None, task: dict, executor: CodeExecutor,
             'pass_count': passed, 'total_tests': len(expected), 'failures': failures}
 
 
+def prepare_evaluation_tasks(tasks: list[dict], max_probes: int) -> list[dict]:
+    """Hold evaluation inputs out of the complete clarification probe set.
+
+    Removal depends only on inputs, before any output is computed. The same
+    remaining tests are used for every method. Source datasets stay unchanged.
+    """
+    prepared = []
+    generator = QuestionGenerator(max_probe_inputs=max_probes)
+    for task in tasks:
+        probes = {json_text(p) for p in generator.build_probe_inputs(
+            task['seed_inputs'], task['params'])}
+        evaluation = [p for p in task['evaluation_inputs'] if json_text(p) not in probes]
+        if not evaluation:
+            raise ValueError(f'No held-out evaluation inputs remain: {task["id"]}')
+        prepared.append({**task, 'evaluation_inputs': evaluation,
+                         'excluded_overlapping_inputs': len(task['evaluation_inputs']) - len(evaluation)})
+    return prepared
+
+
 def task_pool(task: dict, args, root: Path) -> list[str]:
     path = root / 'pools' / f'{task["id"]}.json'
     if path.exists() and args.resume:
@@ -128,13 +149,10 @@ def run_method(method: str, task: dict, pool: list[str], args,
         if method == 'direct1':
             chosen = pool[0] if pool else None
         elif method == 'first_valid':
-            for code in pool:
-                try:
-                    evaluator.validate_code(code)
-                    chosen = code
-                    break
-                except (ValueError, SyntaxError):
-                    continue
+            manager = CandidateManager(evaluator)
+            manager.add_valid_candidates(pool, task['function_name'])
+            best = manager.get_best()
+            chosen = best.code if best else None
         else:
             # Evaluation-only oracle upper bound; NEVER a deployable baseline.
             scores = [evaluate(c, task, evaluator, gold)['pass_count'] for c in pool]
@@ -178,6 +196,7 @@ def run_method(method: str, task: dict, pool: list[str], args,
         'task_id': task['id'], 'family': task['family'], 'method': method,
         'passed_all': verdict['passed_all'], 'pass_count': verdict['pass_count'],
         'total_tests': verdict['total_tests'], 'failures': verdict['failures'],
+        'excluded_overlapping_inputs': task.get('excluded_overlapping_inputs', 0),
         'candidate_count': len(pool), 'chosen_code_sha256': hashlib.sha256((chosen or '').encode()).hexdigest(),
         'has_candidate': chosen is not None, 'questions': questions,
         'flipped_answers': noisy_answers, 'elapsed_s': round(time.monotonic()-started, 5),
@@ -305,6 +324,9 @@ def main(argv=None):
         key={'gemini':'GEMINI_API_KEY','openai':'OPENAI_API_KEY','openrouter':'OPENROUTER_API_KEY'}[args.provider]
         if not os.environ.get(key):
             p.error(f'Missing {key}: manually enter the key in your Kaggle cell (or set the environment variable)')
+    if args.mode == 'real':
+        # Freeze the resolved model in the run identity, including env defaults.
+        args.model = LLMClient(provider=args.provider, model=args.model).model
     tasks = validate_dataset(json.loads(args.dataset.read_text(encoding='utf-8')))
     if args.quick:
         seen=set(); reduced=[]
@@ -315,8 +337,9 @@ def main(argv=None):
     if args.max_tasks is not None:
         if args.max_tasks < 1: p.error('--max-tasks must be positive')
         tasks=tasks[:args.max_tasks]
+    tasks = prepare_evaluation_tasks(tasks, args.max_probes)
     dataset_digest = hashlib.sha256(args.dataset.read_bytes()).hexdigest()
-    settings={'revision':REVISION,'dataset_sha256':dataset_digest,'quick':args.quick,
+    settings={'revision':REVISION,'dataset_sha256':dataset_digest,'methods':sorted(methods),'quick':args.quick,
               'max_tasks':args.max_tasks,'mode':args.mode,'provider':args.provider if args.mode=='real' else 'offline',
               'model':args.model if args.mode=='real' else 'fixed', 'seed':args.seed,
               'top_k':args.top_k,'max_questions':args.max_questions,'max_probes':args.max_probes,
@@ -335,7 +358,9 @@ def main(argv=None):
                               'evaluation_kind':'controlled synthetic regression' if args.mode=='offline'
                                  else 'real candidate generation on synthetic tasks; simulated user',
                               'warning':'32 cases are generated from 8 template families; not independent research tasks',
-                              'python':sys.version.split()[0], 'task_count':len(tasks)})
+                              'python':sys.version.split()[0], 'task_count':len(tasks),
+                              'excluded_overlapping_inputs': {
+                                  t['id']: t['excluded_overlapping_inputs'] for t in tasks}})
     shard=[t for idx,t in enumerate(tasks) if idx % args.num_shards==args.shard_index]
     print(f'RUN {run_id} | mode={args.mode} | tasks={len(shard)}/{len(tasks)} | methods={methods}',flush=True)
     started=time.monotonic(); completed=0

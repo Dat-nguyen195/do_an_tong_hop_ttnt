@@ -225,7 +225,9 @@ Mô tả NL ──► LLM sinh Top-K ứng viên ──► Phân tích sự khá
                                              No  ──► Trả kết quả
 ``` -->
 
-![Pipeline](/image/01.png)
+![Pipeline](../image/01.png)
+
+> Sơ đồ khái quát do Bảo bổ sung. Trong prototype hiện tại, vòng lặp còn dừng khi hết ngân sách câu hỏi, không tìm được câu hỏi phân biệt hoặc không còn ứng viên. Một ứng viên còn lại chưa chứng minh mã đúng trên các đầu vào mới.
 
 **Ưu điểm so với các phương pháp trước:**
 

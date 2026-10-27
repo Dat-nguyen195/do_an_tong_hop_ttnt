@@ -32,7 +32,11 @@ def main():
         if not os.environ.get(env):
             p.error(f'{env} is missing; enter it in the Kaggle notebook or set the environment variable. Never print its value.')
         package = 'google.genai' if args.provider == 'gemini' else 'openai'
-        if importlib.util.find_spec(package) is None:
+        try:
+            available = importlib.util.find_spec(package) is not None
+        except ModuleNotFoundError:
+            available = False
+        if not available:
             p.error(f'Missing {package}; install requirements-llm.txt')
     print(json.dumps({'preflight':'PASS', 'python':platform.python_version(),
                       'tasks':len(problems), 'families':len({p['family'] for p in problems}),

@@ -1,7 +1,6 @@
 """End-to-end SEMSYNTH controller."""
 from __future__ import annotations
 from dataclasses import dataclass, field
-import ast
 from typing import Any, Callable
 
 from src.candidate_manager import CandidateManager
@@ -67,21 +66,7 @@ class SEMSYNTHController:
         self.reset()
         answer_callback = answer_callback or self._default_answer_callback
         raw_codes = self.llm.generate_multiple(description, function_name, params, k=self.config.top_k)
-        # de-duplicate defensively even for custom clients
-        unique_codes = list(dict.fromkeys(code.strip() for code in raw_codes if code and code.strip()))
-        valid_codes = []
-        rejected = []
-        for code in unique_codes:
-            try:
-                self.executor.validate_code(code)
-                tree = ast.parse(code)
-                if not any(isinstance(node, ast.FunctionDef) and node.name == function_name
-                           for node in tree.body):
-                    raise ValueError(f"Missing function {function_name}")
-                valid_codes.append(code)
-            except (SyntaxError, ValueError) as exc:
-                rejected.append({"error": f"{type(exc).__name__}: {exc}"})
-        self.candidate_manager.add_candidates(valid_codes)
+        rejected = self.candidate_manager.add_valid_candidates(raw_codes, function_name)
         if self.config.belief_mode == "soft" and self.candidate_manager.active_count:
             for candidate in self.candidate_manager.get_active():
                 candidate.score = 1.0 / self.candidate_manager.active_count

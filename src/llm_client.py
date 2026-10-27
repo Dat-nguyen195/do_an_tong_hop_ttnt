@@ -7,6 +7,7 @@ path.
 """
 from __future__ import annotations
 
+import ast
 import os
 import re
 import time
@@ -224,7 +225,12 @@ class LLMClient:
                 if attempt < max_attempts:
                     time.sleep(min(0.25 * 2 ** min(failures, 4), 4.0))
                 continue
-            normalized = re.sub(r"\s+", " ", code).strip()
+            # Whitespace inside string literals and indentation carry meaning.
+            # Compare parsed programs, never collapse whitespace in source text.
+            try:
+                normalized = ast.dump(ast.parse(code), include_attributes=False)
+            except SyntaxError:
+                normalized = code
             if code and normalized not in seen:
                 seen.add(normalized)
                 candidates.append(code)

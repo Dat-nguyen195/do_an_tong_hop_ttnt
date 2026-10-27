@@ -1,5 +1,6 @@
 """Candidate lifecycle and filtering for SEMSYNTH Lite."""
 from __future__ import annotations
+import ast
 from dataclasses import dataclass, field
 from typing import Any, Iterable
 
@@ -31,6 +32,24 @@ class CandidateManager:
         self._candidates.extend(added)
         self._log_event("add_candidates", {"count": len(added)})
         return added
+
+    def add_valid_candidates(self, codes: list[str], function_name: str) -> list[dict[str, str]]:
+        """Shared admission checks for the controller and interactive demo."""
+        rejected = []
+        valid = []
+        unique = dict.fromkeys(code.strip() for code in codes if code and code.strip())
+        for code in unique:
+            try:
+                self.executor.validate_code(code)
+                tree = ast.parse(code)
+                if not any(isinstance(node, ast.FunctionDef) and node.name == function_name
+                           for node in tree.body):
+                    raise ValueError(f"Missing function {function_name}")
+                valid.append(code)
+            except (SyntaxError, ValueError) as exc:
+                rejected.append({"error": f"{type(exc).__name__}: {exc}"})
+        self.add_candidates(valid)
+        return rejected
 
     def keep_indices(self, indices: Iterable[int], reason: str = "clarification") -> int:
         keep = set(indices)

@@ -1,339 +1,107 @@
-# SEMSYNTH Lite — Behavior-Guided Interactive Program Synthesis
+# SEMSYNTH Lite
 
-SEMSYNTH Lite is a course/research prototype for resolving ambiguity in natural-language programming requests with low-friction **Yes/No clarification questions**.
+Đồ án tổng hợp hướng Trí tuệ nhân tạo: sinh các hàm Python nhỏ từ mô tả tự nhiên,
+hỏi người dùng Yes/No về các hành vi khác nhau, rồi thu hẹp tập chương trình ứng viên.
+Phạm vi chính là xử lý chuỗi và danh sách; giao diện dùng Streamlit.
 
-The runnable loop is now:
+## Tài liệu làm việc
 
-```text
-Natural-language task
-        ↓
-Generate Top-K candidate programs
-        ↓
-Execute candidates on behavioral probe inputs
-        ↓
-Find a high-information / balanced disagreement
-        ↓
-Ask a Yes/No behavioral clarification
-        ↓
-Filter candidate partition
-        ↓
-Repeat until no useful distinction remains
-        ↓
-Return current best candidate + full interaction log
+- [Kế hoạch hoàn thành đồ án](docs/KE_HOACH_HOAN_THANH.md): phạm vi, phân công, mốc và tiêu chí nghiệm thu.
+- [Tổng hợp đóng góp và quyết định tích hợp](docs/TONG_HOP_DONG_GOP.md).
+- [Báo cáo giai đoạn 1](docs/phase1_report.md): khảo sát và mục tiêu ban đầu; các tỷ lệ kỳ vọng chưa phải kết quả đo.
+- [Hướng dẫn Kaggle](notebooks/KAGGLE_QUICKSTART.md): lựa chọn bổ sung khi cần chạy trên cloud.
+
+## Cài đặt và chạy trên Windows
+
+Yêu cầu Python 3.10 trở lên; môi trường tích hợp dùng Python 3.12.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-## What is implemented
-
-- ✅ Gemini / OpenAI / OpenRouter unified LLM client
-- ✅ real candidate sampling temperatures + duplicate removal
-- ✅ deterministic offline mock mode for zero-key demos
-- ✅ candidate execution and behavioral signatures
-- ✅ distinguishing-input generation from seed inputs
-- ✅ multi-output → binary Yes/No candidate partitioning
-- ✅ balance score + binary information gain
-- ✅ candidate filtering by clarification answer
-- ✅ end-to-end SEMSYNTH controller
-- ✅ Direct-1 and explicitly-labelled Oracle Best-of-K baselines
-- ✅ stateful Streamlit demo
-- ✅ Kaggle quickstart script and notebook
-- ✅ subprocess execution, AST policy checks and timeout
-- ✅ 70 automated tests covering the core loop, provider adapter, probe generation and executor edge cases
-
-> **Execution safety note:** generated code runs in a fresh subprocess with an AST policy, isolated working directory and timeout. This is suitable process isolation for a local/course prototype; it is **not a hardened multi-tenant sandbox**.
-
----
-
-## 1. Local quickstart
-
-Python 3.10+ is recommended.
-
-```bash
-git clone <YOUR_REPOSITORY_URL> semsynth-lite
-cd semsynth-lite
-python -m pip install -r requirements.txt
-```
-
-### Zero-key smoke demo
-
-```bash
-python kaggle_run.py --offline
-pytest -q
-```
-
-The offline demo deliberately uses an underspecified task (`Remove duplicate elements from a list.`), generates plausible competing implementations, asks a distinguishing Yes/No question, and filters candidates according to a simulated reference intent.
-
-### Real LLM mode
-
-Copy the environment template:
-
-```bash
-cp .env.example .env
-```
-
-Set one provider key in `.env`. Gemini is the recommended default for this repository:
-
-```dotenv
-LLM_PROVIDER=gemini
-DEFAULT_MODEL=gemini-3.8-flash
-GEMINI_API_KEY=...
-```
-
-Then run:
-
-```bash
-python kaggle_run.py --provider gemini --model gemini-3.8-flash
-```
-
-OpenAI and OpenRouter remain supported:
-
-```bash
-python kaggle_run.py --provider openai --model gpt-4o-mini
-python kaggle_run.py --provider openrouter --model <OPENROUTER_MODEL_NAME>
-```
-
----
-
-## 2. Kaggle — clone and run
-
-Open a Kaggle notebook and enable Internet if you want to clone from GitHub or call a remote LLM API.
-
-### Cell 1 — clone
-
-```python
-REPO_URL = "https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPOSITORY>.git"
-!git clone {REPO_URL} semsynth-lite
-%cd semsynth-lite
-```
-
-### Cell 2 — install
-
-```python
-!python -m pip install -q -r requirements.txt
-```
-
-### Cell 3A — offline full-loop demo, no secret required
-
-```python
-!python kaggle_run.py --offline
-!pytest -q
-```
-
-### Cell 3B — real Gemini mode
-
-Add `GEMINI_API_KEY` under **Kaggle → Add-ons → Secrets**, then:
-
-```python
-from kaggle_secrets import UserSecretsClient
-import os
-
-os.environ["GEMINI_API_KEY"] = UserSecretsClient().get_secret("GEMINI_API_KEY")
-os.environ["LLM_PROVIDER"] = "gemini"
-os.environ["DEFAULT_MODEL"] = "gemini-3.8-flash"
-
-!python kaggle_run.py --provider gemini --model gemini-3.8-flash
-```
-
-You can also run a deterministic multi-case smoke suite before using the API:
-
-```bash
-python kaggle_run.py --offline-suite
-```
-
-A notebook-ready version is included at:
-
-```text
-notebooks/kaggle_quickstart.ipynb
-```
-
----
-
-## 3. Run the Streamlit demo
-
-```bash
-streamlit run app.py
-```
-
-The UI supports:
-
-- offline demo mode;
-- real Gemini/OpenAI/OpenRouter mode;
-- Top-K configuration;
-- stateful Yes/No clarification;
-- candidate count tracking;
-- current best code;
-- interaction transcript.
-
----
-
-## 4. Baselines
-
-### Direct-1
-
-```bash
-python -m src.baseline_cot --limit 15
-```
-
-### Offline smoke mode
-
-```bash
-python -m src.baseline_cot --dry-run --limit 3
-```
-
-### Oracle Best-of-K upper bound
-
-```bash
-python -m src.baseline_cot --top-k 5 --limit 15
-```
-
-`Oracle-Best-of-K` selects the candidate using benchmark tests and is therefore an **upper bound**, not a deployable self-selection baseline. Keep that label in reports.
-
-Results are written under `results/`.
-
----
-
-## 5. Core modules
-
-```text
-src/
-├── llm_client.py          unified API client + offline mock
-├── code_executor.py       process isolation / AST policy / timeout
-├── candidate_manager.py   candidate lifecycle and filtering
-├── question_generator.py  probes, behavior groups, binary partitions
-├── semsynth_controller.py end-to-end interactive controller
-└── baseline_cot.py        Direct-1 / Oracle Best-of-K experiment runner
-```
-
-Important objects:
-
-```python
-from src.llm_client import LLMClient
-from src.semsynth_controller import SEMSYNTHConfig, SEMSYNTHController
-
-llm = LLMClient()
-controller = SEMSYNTHController(
-    llm,
-    SEMSYNTHConfig(top_k=5, max_questions=4),
-)
-
-result = controller.run(
-    description="Remove duplicate elements from a list.",
-    function_name="remove_duplicates",
-    params="xs",
-    seed_inputs=[{"xs": [3, 1, 3, 2]}],
-)
-
-print(result.best_code)
-print(result.questions_asked)
-```
-
-For reproducible automated evaluation, provide a controlled `answer_callback` rather than reading from stdin.
-
----
-
-## 6. Clarification objective
-
-For a binary candidate partition with `yes_n` and `no_n`, the implementation records:
-
-```text
-balance = 1 - |yes_n - no_n| / total
-```
-
-and binary entropy:
-
-```text
-H(p) = -p log2(p) - (1-p) log2(1-p)
-```
-
-A 50/50 partition has maximum balance and information gain. If a probe produces more than two outputs, SEMSYNTH evaluates binary properties of the form:
-
-```text
-Should this input return Y?
-```
-
-so a Yes/No question can still partition a multi-way disagreement.
-
----
-
-## 7. Dataset and research hygiene
-
-`config/dataset_sample.json` contains the original 15-task pilot dataset. `HE_008` is corrected to domain `list`.
-
-For the final experiment, do **not** treat the existing gold clarification fields as automatically generated questions. A clean evaluation should distinguish:
-
-1. **Gold/oracle clarification** — upper bound;
-2. **generated clarification** — proposed method;
-3. **Direct-1** — zero-interaction baseline;
-4. **matched Top-K** — controls for extra LLM sampling budget.
-
-The current 15 tasks are best treated as a pilot/debug set. Build a larger explicitly underspecified benchmark before making statistical claims.
-
----
-
-## 8. Tests
-
-```bash
-pytest -q
-```
-
-The suite covers:
-
-- dataset schema;
-- executor success/failure behavior;
-- unsafe import rejection;
-- LLM code extraction;
-- actual sampling-temperature propagation;
-- candidate partition filtering;
-- behavioral question generation;
-- end-to-end offline SEMSYNTH loop;
-- project structure.
-
----
-
-## 9. Project tree
-
-```text
-.
-├── app.py
-├── kaggle_run.py
-├── config/
-│   └── dataset_sample.json
-├── docs/
-├── notebooks/
-│   ├── KAGGLE_QUICKSTART.md
-│   └── kaggle_quickstart.ipynb
-├── src/
-├── tests/
-├── .env.example
-├── requirements.txt
-└── README.md
-```
-
-## License / purpose
-
-Academic course/research prototype for the 2026–2027 semester.
-
-## 2026 Kaggle-first reproducible benchmark patch
-
-The new CPU-only, resumable study runner is `run_experiments.py`; see
-[`notebooks/KAGGLE_QUICKSTART.md`](notebooks/KAGGLE_QUICKSTART.md) for a
-full Kaggle one-cell notebook and the two-session sharding option.
-
-```bash
-python -m pip install -r requirements-kaggle.txt
+Linux/macOS: dùng `.venv/bin/python` thay cho `.\.venv\Scripts\python.exe`.
+Trên giao diện, chọn **Offline demo (no API key)** để thử trước. Ba tình huống có
+ứng viên mẫu là xóa phần tử trùng, sắp xếp và tìm phần tử chung. Các mô tả khác
+cần chọn **Real LLM** để sinh chương trình theo yêu cầu.
+
+Để dùng API, sao chép `.env.example` thành `.env`, điền khóa của provider đã chọn
+và model mà tài khoản thực sự truy cập được. Có adapter OpenAI, OpenRouter và
+Gemini. Chạy thử một bài trước khi chạy hàng loạt. Kiểm thử offline không xác nhận
+một model/khóa API còn hoạt động. Không lưu khóa trong notebook hoặc Git.
+
+## Luồng tối thiểu
+
+1. Sinh tối đa K ứng viên, loại bản trùng, sai cú pháp và sai tên hàm.
+2. Chạy ứng viên trên đầu vào thăm dò nhỏ để tìm khác biệt.
+3. Chọn câu hỏi chia tập ứng viên gần cân bằng nhất.
+4. Nhận Yes/No và loại ứng viên không phù hợp.
+5. Dừng khi còn một ứng viên, hết ngân sách câu hỏi hoặc không tìm được khác biệt.
+
+Mẫu ngữ nghĩa hiện hỗ trợ thứ tự khi loại trùng và chiều sắp xếp. Câu hỏi gắn
+với đầu vào quan sát được; trường hợp khác dùng câu hỏi I/O. Một ứng viên còn lại
+không bảo đảm đúng trên mọi đầu vào. Giao diện ghi rõ khi lựa chọn còn tạm thời.
+
+| Thành phần | File |
+|---|---|
+| Sinh ứng viên, API và mock | `src/llm_client.py` |
+| Kiểm tra và lọc ứng viên | `src/candidate_manager.py` |
+| Chạy hàm trong tiến trình riêng | `src/code_executor.py` |
+| Probe và câu hỏi Yes/No | `src/question_generator.py` |
+| Điều phối phiên, log, điều kiện dừng | `src/semsynth_controller.py` |
+| Demo tương tác | `app.py` |
+| Direct-1 / Oracle Best-of-K | `src/baseline_cot.py` |
+| Thực nghiệm có checkpoint | `run_experiments.py` |
+
+Đồ án mặc định dùng lọc cứng và Top-K nhỏ. Cập nhật xác suất mềm, mô phỏng trả lời
+sai, explanation trace và chạy nhiều shard là phần mở rộng tùy chọn.
+
+## Kiểm thử và thực nghiệm
+
+Các lệnh sau dùng Python của môi trường đã kích hoạt; có thể thay `python`
+bằng đường dẫn `.venv\Scripts\python.exe`.
+
+```powershell
 python -m pytest -q
 python scripts/preflight.py --mode offline
-python run_experiments.py --quick       # 8 controlled regression cases
-python run_experiments.py               # 32 controlled cases, 8 families
+python kaggle_run.py --offline-suite
+python -m src.baseline_cot --dry-run --limit 3
+python run_experiments.py --mode offline --quick --methods direct1,first_valid,balanced --require-complete
 ```
 
-Task-level checkpoints, summaries, and `SEMSYNTH_RESULTS.zip` are created
-inside `results/semsynth_benchmark/<run-id>/`. No key or GPU is needed for
-this controlled offline run. **Offline accuracy is not evidence of live-LLM
-program-synthesis performance.** Optional live candidate generation requires
-`requirements-llm.txt` and the corresponding provider key in Kaggle Secrets.
+- `config/dataset_sample.json`: 15 bài pilot biên soạn theo HumanEval/MBPP;
+  cần đối chiếu nguồn và test trước khi dùng làm kết quả cuối kỳ.
+- `config/ambiguity_benchmark.json`: 32 ca tổng hợp thuộc 8 nhóm mẫu. Đây là bộ
+  kiểm tra có kiểm soát, không phải 32 bài thực tế độc lập.
+- Runner dùng cùng pool ứng viên cho các cách chọn, tách đầu vào đánh giá khỏi
+  toàn bộ probe làm rõ, ghi số đầu vào bị loại do trùng trong manifest.
+- `direct1` của runner là ứng viên đầu trong pool đã sinh. Đo một lần sinh độc
+  lập bằng `src.baseline_cot`; không coi sinh cả pool là một API call.
+- `oracle_upper_bound` / Oracle Best-of-K dùng đáp án để chọn chương trình,
+  chỉ thể hiện cận trên và không phải baseline có thể triển khai cho người dùng.
+- `success` của phiên nghĩa là còn ứng viên; `passed_all` đo vượt qua test đánh
+  giá. Báo cáo riêng hai đại lượng này.
 
-The mathematical extension adds configurable Bayesian belief updates,
-execution-grounded semantic question templates, and improved probe coverage.
-The original `kaggle_run.py --offline-suite` and original public controller
-API remain supported. The controller's `success` is a legacy candidate-exists
-flag; published accuracy must use benchmark `passed_all` outcomes instead.
+Kết quả trong `results/` gồm manifest, checkpoint, CSV và `SEMSYNTH_RESULTS.zip`.
+Resume chỉ dùng lại cùng cấu hình, model, tập phương pháp và dữ liệu. Để ghép shard:
+
+```powershell
+python scripts/merge_shards.py path/to/shard0.zip path/to/shard1.zip --output-dir results/merged
+```
+
+Script đọc phương pháp từ manifest và từ chối dữ liệu không khớp.
+
+## Giới hạn
+
+Executor có kiểm tra AST, timeout và tiến trình riêng, phù hợp demo cục bộ với hàm
+nhỏ. Nó chưa phải môi trường chạy mã đối kháng cho dịch vụ công cộng.
+
+Mock/offline chỉ xác nhận pipeline và tình huống kiểm thử. Đồ án còn cần LLM thật,
+dữ liệu đã rà nguồn, phân tích lỗi và diễn tập demo. Chưa đo với người dùng thì
+không suy ra mức giảm tải nhận thức.
+
+`IMPROVEMENT_REPORT.md`, `PATCH_*` và notebook cũ là tài liệu bàn giao lịch sử;
+số test trong đó phản ánh thời điểm viết. Dùng kế hoạch và tổng hợp đóng góp làm
+trạng thái hiện tại.

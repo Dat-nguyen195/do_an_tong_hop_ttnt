@@ -21,6 +21,7 @@ def init_state():
         "fn": "",
         "params": "",
         "description": "",
+        "rejected": [],
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -36,6 +37,7 @@ def next_question():
     st.session_state.current_q = qgen.generate_question(
         manager.get_active(), st.session_state.fn, st.session_state.description,
         params=st.session_state.params,
+        semantic=True,
     )
 
 
@@ -89,18 +91,23 @@ with c2:
     params = st.text_input("Parameters", value="xs")
 
 if st.button("Generate candidates", type="primary"):
+    st.session_state.manager = None
+    st.session_state.current_q = None
+    st.session_state.transcript = []
+    st.session_state.rejected = []
     try:
         llm = MockLLMClient() if mode.startswith("Offline") else LLMClient(provider=provider, model=model)
         executor = CodeExecutor(timeout=5)
         manager = CandidateManager(executor)
         codes = llm.generate_multiple(description, function_name, params, k=top_k)
-        manager.add_candidates(list(dict.fromkeys(codes)))
+        rejected = manager.add_valid_candidates(codes, function_name)
         st.session_state.manager = manager
         st.session_state.qgen = QuestionGenerator(executor, max_questions=max_questions, max_probe_inputs=12)
         st.session_state.transcript = []
         st.session_state.fn = function_name
         st.session_state.params = params
         st.session_state.description = description
+        st.session_state.rejected = rejected
         next_question()
     except Exception as exc:
         st.error(f"Could not start synthesis: {type(exc).__name__}: {exc}")
@@ -108,6 +115,8 @@ if st.button("Generate candidates", type="primary"):
 manager = st.session_state.manager
 if manager is not None:
     st.metric("Active candidates", f"{manager.active_count}/{manager.total_count}")
+    if st.session_state.rejected:
+        st.warning(f"Excluded {len(st.session_state.rejected)} invalid candidates.")
     q = st.session_state.current_q
     if q is not None:
         st.subheader("Clarification")
@@ -116,8 +125,14 @@ if manager is not None:
         a, b = st.columns(2)
         a.button("Yes", on_click=answer_current, args=(True,), use_container_width=True)
         b.button("No", on_click=answer_current, args=(False,), use_container_width=True)
+    elif manager.active_count == 0:
+        st.error("No valid candidate remains. Generate a new candidate set.")
+    elif manager.active_count == 1:
+        st.success("One candidate remains. Check it on new examples before relying on it.")
+    elif st.session_state.qgen.questions_remaining == 0:
+        st.warning("Question budget reached. The selection is tentative; several candidates remain.")
     else:
-        st.success("No further distinguishing question is available, or the candidates have converged.")
+        st.warning("No distinguishing question was found. The selection is tentative; several candidates remain.")
 
     best = manager.get_best()
     if best:
