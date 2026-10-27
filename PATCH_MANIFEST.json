@@ -1,0 +1,29 @@
+{
+  "patch_format": "repository-relative-only",
+  "base_archive_sha256": "44f0d64cfdaaaa9a4686603ceda26ce25c1f7b0a54e25f317d61e9103867b2b0",
+  "changed_original_paths": [
+    ".env.example",
+    ".gitignore",
+    "README.md",
+    "notebooks/KAGGLE_QUICKSTART.md",
+    "notebooks/kaggle_gemini_quickstart.ipynb",
+    "notebooks/kaggle_quickstart.ipynb",
+    "src/code_executor.py",
+    "src/llm_client.py",
+    "src/question_generator.py",
+    "src/semsynth_controller.py"
+  ],
+  "new_paths": [
+    "PATCH_README.md",
+    "config/ambiguity_benchmark.json",
+    "notebooks/KAGGLE_ONE_CELL.ipynb",
+    "requirements-kaggle.txt",
+    "requirements-llm.txt",
+    "run_experiments.py",
+    "scripts/merge_shards.py",
+    "scripts/preflight.py",
+    "tests/test_kaggle_patch.py"
+  ],
+  "source_revision": "SEMSYNTH-KAGGLE-2026-10-17",
+  "instructions": "Extract into original repository root, overwriting changed paths; do not use as a standalone repository."
+}

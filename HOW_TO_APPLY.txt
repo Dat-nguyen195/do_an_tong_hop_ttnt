@@ -1,0 +1,1 @@
+Overlay scripts/preflight.py into the root of the SEMSYNTH repository, preserving its path, then commit and push. This only repairs Python module import resolution; it changes no experimental method. The fixed Kaggle cell also works without patching the repository.

@@ -195,15 +195,15 @@ class TestCodeExecutor:
             "input": {"numbers": [1.0, 5.0, 2.0, 2.1], "threshold": 0.5},
             "expected_output": True,
         }
+        tc = {
+            "input": {"numbers": [1.0, 3.0, 1.1, 5.0], "threshold": 0.2},
+            "expected_output": True,
+        }
         result = executor.run_test_case(
             sample_code_wrong, "has_close_elements", tc
         )
-        # Mã sai chỉ so sánh kề: (1,5)=4, (5,2)=3, (2,2.1)=0.1 < 0.5 → True
-        # Vậy test này vẫn pass do kề nhau... chọn case khác
-        # Thực ra case [1.0, 3.0, 1.1, 5.0] threshold=0.2:
-        # Đúng: 1.0 vs 1.1 = 0.1 < 0.2 → True
-        # Sai (kề): (1,3)=2, (3,1.1)=1.9, (1.1,5)=3.9 → False
-        pass  # Đây là test minh họa cấu trúc, logic chi tiết sẽ ở Phase 2
+        assert result["passed"] is False
+        assert result["actual"] is False
 
     def test_run_all_tests(self, executor, sample_code_correct):
         """Chạy tất cả test cases cho mã đúng."""

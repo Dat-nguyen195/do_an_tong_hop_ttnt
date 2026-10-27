@@ -1,0 +1,6 @@
+# Install this only for --mode real / web app. Kaggle offline needs no provider SDK.
+-r requirements-kaggle.txt
+python-dotenv>=1.0.1,<2
+openai>=1.40.0,<3
+google-genai>=1.0.0,<2
+streamlit>=1.36.0,<2

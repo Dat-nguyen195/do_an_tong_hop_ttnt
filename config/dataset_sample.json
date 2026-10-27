@@ -9,15 +9,42 @@
     "function_name": "has_close_elements",
     "test_cases": [
       {
-        "input": {"numbers": [1.0, 2.0, 3.0], "threshold": 0.5},
+        "input": {
+          "numbers": [
+            1.0,
+            2.0,
+            3.0
+          ],
+          "threshold": 0.5
+        },
         "expected_output": false
       },
       {
-        "input": {"numbers": [1.0, 2.8, 3.0, 4.0, 5.0, 2.0], "threshold": 0.3},
+        "input": {
+          "numbers": [
+            1.0,
+            2.8,
+            3.0,
+            4.0,
+            5.0,
+            2.0
+          ],
+          "threshold": 0.3
+        },
         "expected_output": true
       },
       {
-        "input": {"numbers": [1.0, 2.0, 3.9, 4.0, 5.0, 2.2], "threshold": 0.05},
+        "input": {
+          "numbers": [
+            1.0,
+            2.0,
+            3.9,
+            4.0,
+            5.0,
+            2.2
+          ],
+          "threshold": 0.05
+        },
         "expected_output": false
       }
     ],
@@ -44,15 +71,21 @@
     "function_name": "string_sequence",
     "test_cases": [
       {
-        "input": {"n": 0},
+        "input": {
+          "n": 0
+        },
         "expected_output": "0"
       },
       {
-        "input": {"n": 5},
+        "input": {
+          "n": 5
+        },
         "expected_output": "0 1 2 3 4 5"
       },
       {
-        "input": {"n": 3},
+        "input": {
+          "n": 3
+        },
         "expected_output": "0 1 2 3"
       }
     ],
@@ -79,15 +112,29 @@
     "function_name": "concatenate",
     "test_cases": [
       {
-        "input": {"strings": []},
+        "input": {
+          "strings": []
+        },
         "expected_output": ""
       },
       {
-        "input": {"strings": ["a", "b", "c"]},
+        "input": {
+          "strings": [
+            "a",
+            "b",
+            "c"
+          ]
+        },
         "expected_output": "abc"
       },
       {
-        "input": {"strings": ["hello", " ", "world"]},
+        "input": {
+          "strings": [
+            "hello",
+            " ",
+            "world"
+          ]
+        },
         "expected_output": "hello world"
       }
     ],
@@ -114,16 +161,28 @@
     "function_name": "all_prefixes",
     "test_cases": [
       {
-        "input": {"string": "abc"},
-        "expected_output": ["a", "ab", "abc"]
+        "input": {
+          "string": "abc"
+        },
+        "expected_output": [
+          "a",
+          "ab",
+          "abc"
+        ]
       },
       {
-        "input": {"string": ""},
+        "input": {
+          "string": ""
+        },
         "expected_output": []
       },
       {
-        "input": {"string": "x"},
-        "expected_output": ["x"]
+        "input": {
+          "string": "x"
+        },
+        "expected_output": [
+          "x"
+        ]
       }
     ],
     "clarification_questions": [
@@ -149,19 +208,49 @@
     "function_name": "pairs_sum_to_zero",
     "test_cases": [
       {
-        "input": {"l": [1, 3, 5, 0]},
+        "input": {
+          "l": [
+            1,
+            3,
+            5,
+            0
+          ]
+        },
         "expected_output": false
       },
       {
-        "input": {"l": [1, 3, -2, 1]},
+        "input": {
+          "l": [
+            1,
+            3,
+            -2,
+            1
+          ]
+        },
         "expected_output": false
       },
       {
-        "input": {"l": [1, 2, 3, 7]},
+        "input": {
+          "l": [
+            1,
+            2,
+            3,
+            7
+          ]
+        },
         "expected_output": false
       },
       {
-        "input": {"l": [2, 4, -5, 3, 5, 7]},
+        "input": {
+          "l": [
+            2,
+            4,
+            -5,
+            3,
+            5,
+            7
+          ]
+        },
         "expected_output": true
       }
     ],
@@ -188,15 +277,24 @@
     "function_name": "same_chars",
     "test_cases": [
       {
-        "input": {"s0": "eabcdzzzz", "s1": "dddzzzzzzzddeddabc"},
+        "input": {
+          "s0": "eabcdzzzz",
+          "s1": "dddzzzzzzzddeddabc"
+        },
         "expected_output": true
       },
       {
-        "input": {"s0": "abcd", "s1": "dddddddabc"},
+        "input": {
+          "s0": "abcd",
+          "s1": "dddddddabc"
+        },
         "expected_output": true
       },
       {
-        "input": {"s0": "eabcd", "s1": "dddddddabc"},
+        "input": {
+          "s0": "eabcd",
+          "s1": "dddddddabc"
+        },
         "expected_output": false
       }
     ],
@@ -223,15 +321,63 @@
     "function_name": "common",
     "test_cases": [
       {
-        "input": {"l1": [1, 4, 3, 34, 653, 2, 5], "l2": [5, 7, 1, 5, 9, 653, 121]},
-        "expected_output": [1, 5, 653]
+        "input": {
+          "l1": [
+            1,
+            4,
+            3,
+            34,
+            653,
+            2,
+            5
+          ],
+          "l2": [
+            5,
+            7,
+            1,
+            5,
+            9,
+            653,
+            121
+          ]
+        },
+        "expected_output": [
+          1,
+          5,
+          653
+        ]
       },
       {
-        "input": {"l1": [5, 3, 2, 8], "l2": [3, 2]},
-        "expected_output": [2, 3]
+        "input": {
+          "l1": [
+            5,
+            3,
+            2,
+            8
+          ],
+          "l2": [
+            3,
+            2
+          ]
+        },
+        "expected_output": [
+          2,
+          3
+        ]
       },
       {
-        "input": {"l1": [1, 2, 3], "l2": [4, 5, 6]},
+        "input": {
+          "l1": [
+            1,
+            2,
+            3
+          ],
+          "l2": [
+            4,
+            5,
+            6
+          ]
+        },
         "expected_output": []
       }
     ],
@@ -252,21 +398,47 @@
     "id": "HE_008",
     "source": "HumanEval",
     "source_id": "HumanEval/62",
-    "domain": "string",
+    "domain": "list",
     "title": "Derivative of Polynomial",
     "description": "Write a function that takes a list of coefficients representing a polynomial (xs[0] + xs[1]*x + xs[2]*x^2 + ...) and returns the derivative as a list of coefficients.",
     "function_name": "derivative",
     "test_cases": [
       {
-        "input": {"xs": [3, 1, 2, 4, 5]},
-        "expected_output": [1, 4, 12, 20]
+        "input": {
+          "xs": [
+            3,
+            1,
+            2,
+            4,
+            5
+          ]
+        },
+        "expected_output": [
+          1,
+          4,
+          12,
+          20
+        ]
       },
       {
-        "input": {"xs": [1, 2, 3]},
-        "expected_output": [2, 6]
+        "input": {
+          "xs": [
+            1,
+            2,
+            3
+          ]
+        },
+        "expected_output": [
+          2,
+          6
+        ]
       },
       {
-        "input": {"xs": [5]},
+        "input": {
+          "xs": [
+            5
+          ]
+        },
         "expected_output": []
       }
     ],
@@ -293,16 +465,64 @@
     "function_name": "similar_elements",
     "test_cases": [
       {
-        "input": {"test_tup1": [3, 4, 5, 6], "test_tup2": [5, 7, 4, 10]},
-        "expected_output": [4, 5]
+        "input": {
+          "test_tup1": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "test_tup2": [
+            5,
+            7,
+            4,
+            10
+          ]
+        },
+        "expected_output": [
+          4,
+          5
+        ]
       },
       {
-        "input": {"test_tup1": [1, 2, 3, 4], "test_tup2": [5, 4, 3, 7]},
-        "expected_output": [3, 4]
+        "input": {
+          "test_tup1": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "test_tup2": [
+            5,
+            4,
+            3,
+            7
+          ]
+        },
+        "expected_output": [
+          3,
+          4
+        ]
       },
       {
-        "input": {"test_tup1": [11, 12, 14, 13], "test_tup2": [17, 15, 14, 13]},
-        "expected_output": [13, 14]
+        "input": {
+          "test_tup1": [
+            11,
+            12,
+            14,
+            13
+          ],
+          "test_tup2": [
+            17,
+            15,
+            14,
+            13
+          ]
+        },
+        "expected_output": [
+          13,
+          14
+        ]
       }
     ],
     "clarification_questions": [
@@ -328,15 +548,51 @@
     "function_name": "square_nums",
     "test_cases": [
       {
-        "input": {"nums": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]},
-        "expected_output": [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+        "input": {
+          "nums": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        "expected_output": [
+          1,
+          4,
+          9,
+          16,
+          25,
+          36,
+          49,
+          64,
+          81,
+          100
+        ]
       },
       {
-        "input": {"nums": [0, -1, 2]},
-        "expected_output": [0, 1, 4]
+        "input": {
+          "nums": [
+            0,
+            -1,
+            2
+          ]
+        },
+        "expected_output": [
+          0,
+          1,
+          4
+        ]
       },
       {
-        "input": {"nums": []},
+        "input": {
+          "nums": []
+        },
         "expected_output": []
       }
     ],
@@ -363,15 +619,24 @@
     "function_name": "remove_Occ",
     "test_cases": [
       {
-        "input": {"s": "hello", "ch": "l"},
+        "input": {
+          "s": "hello",
+          "ch": "l"
+        },
         "expected_output": "heo"
       },
       {
-        "input": {"s": "abcda", "ch": "a"},
+        "input": {
+          "s": "abcda",
+          "ch": "a"
+        },
         "expected_output": "bcd"
       },
       {
-        "input": {"s": "PHP", "ch": "P"},
+        "input": {
+          "s": "PHP",
+          "ch": "P"
+        },
         "expected_output": "H"
       }
     ],
@@ -398,15 +663,39 @@
     "function_name": "find_substring",
     "test_cases": [
       {
-        "input": {"string_list": ["red", "black", "white", "green", "orange"], "sub_str": "ack"},
+        "input": {
+          "string_list": [
+            "red",
+            "black",
+            "white",
+            "green",
+            "orange"
+          ],
+          "sub_str": "ack"
+        },
         "expected_output": true
       },
       {
-        "input": {"string_list": ["red", "black", "white", "green", "orange"], "sub_str": "abc"},
+        "input": {
+          "string_list": [
+            "red",
+            "black",
+            "white",
+            "green",
+            "orange"
+          ],
+          "sub_str": "abc"
+        },
         "expected_output": false
       },
       {
-        "input": {"string_list": ["hello", "world"], "sub_str": "llo"},
+        "input": {
+          "string_list": [
+            "hello",
+            "world"
+          ],
+          "sub_str": "llo"
+        },
         "expected_output": true
       }
     ],
@@ -433,15 +722,36 @@
     "function_name": "smallest_num",
     "test_cases": [
       {
-        "input": {"xs": [10, 20, 1, 45, 99]},
+        "input": {
+          "xs": [
+            10,
+            20,
+            1,
+            45,
+            99
+          ]
+        },
         "expected_output": 1
       },
       {
-        "input": {"xs": [1, 2, 3]},
+        "input": {
+          "xs": [
+            1,
+            2,
+            3
+          ]
+        },
         "expected_output": 1
       },
       {
-        "input": {"xs": [45, 46, 50, 60]},
+        "input": {
+          "xs": [
+            45,
+            46,
+            50,
+            60
+          ]
+        },
         "expected_output": 45
       }
     ],
@@ -468,15 +778,21 @@
     "function_name": "count_upper",
     "test_cases": [
       {
-        "input": {"s": "PYthon"},
+        "input": {
+          "s": "PYthon"
+        },
         "expected_output": 2
       },
       {
-        "input": {"s": "BigData"},
+        "input": {
+          "s": "BigData"
+        },
         "expected_output": 2
       },
       {
-        "input": {"s": "program"},
+        "input": {
+          "s": "program"
+        },
         "expected_output": 0
       }
     ],
@@ -503,15 +819,24 @@
     "function_name": "search_literal",
     "test_cases": [
       {
-        "input": {"pattern": "python", "text": "hello python world"},
+        "input": {
+          "pattern": "python",
+          "text": "hello python world"
+        },
         "expected_output": 6
       },
       {
-        "input": {"pattern": "xyz", "text": "hello world"},
+        "input": {
+          "pattern": "xyz",
+          "text": "hello world"
+        },
         "expected_output": -1
       },
       {
-        "input": {"pattern": "ll", "text": "hello"},
+        "input": {
+          "pattern": "ll",
+          "text": "hello"
+        },
         "expected_output": 2
       }
     ],
