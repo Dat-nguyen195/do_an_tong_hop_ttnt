@@ -1,0 +1,10 @@
+{
+  "source_tex": "/media/nguyen-dat/New Volume/Research/implement/docs/paper_icse2027.tex",
+  "source_tex_sha256": "21377117fdfc756e38284ab24e4ca29cede44164960aad1e042ef1f532803be7",
+  "source_pdf": "/media/nguyen-dat/New Volume/Research/implement/docs/paper_icse2027.pdf",
+  "source_pdf_sha256": "5ae9109c59c5948c373f4d43a110d79da81166f6c6f36ec0d69c2da5e8a7bb62",
+  "local_reference": "report/reference/paper_icse2027.tex",
+  "use": "Read-only reference for theory and IEEEtran layout; original numeric results are not course-project results.",
+  "main_report_planned": "report/main.tex",
+  "copied_on": "2026-10-28"
+}

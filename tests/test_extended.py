@@ -51,9 +51,13 @@ def test_gemini_is_supported_provider():
     assert PROVIDER_CONFIG["gemini"]["env_key"] == "GEMINI_API_KEY"
 
 
-def test_gemini_default_model_is_current_flash():
+def test_gemini_uses_provider_default_without_model_overrides(monkeypatch):
+    # A local .env may intentionally select a different model. This test checks
+    # the fallback configuration, independently of the developer's account.
+    monkeypatch.delenv("DEFAULT_MODEL", raising=False)
+    monkeypatch.delenv("LLM_MODEL", raising=False)
     client = LLMClient(provider="gemini", api_key="dummy")
-    assert client.model == "gemini-3.8-flash"
+    assert client.model == PROVIDER_CONFIG["gemini"]["default_model"]
 
 
 def test_gemini_missing_key_fails_only_when_client_is_needed(monkeypatch):

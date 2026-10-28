@@ -24,3 +24,25 @@ Thumbs.db
 
 # Results output
 results/
+
+# Additional local Python environments
+.venv-*/
+
+# LaTeX build products
+report/build/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# Temporary render/review files
+tmp/
+
+# Beamer build products
+*.nav
+*.snm

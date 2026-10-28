@@ -1,0 +1,175 @@
+[
+  {
+    "local_id": "HE_001",
+    "upstream": {
+      "task_id": "HumanEval/0",
+      "prompt": "from typing import List\n\n\ndef has_close_elements(numbers: List[float], threshold: float) -> bool:\n    \"\"\" Check if in given list of numbers, are any two numbers closer to each other than\n    given threshold.\n    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)\n    False\n    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)\n    True\n    \"\"\"\n",
+      "entry_point": "has_close_elements",
+      "canonical_solution": "    for idx, elem in enumerate(numbers):\n        for idx2, elem2 in enumerate(numbers):\n            if idx != idx2:\n                distance = abs(elem - elem2)\n                if distance < threshold:\n                    return True\n\n    return False\n",
+      "test": "\n\nMETADATA = {\n    'author': 'jt',\n    'dataset': 'test'\n}\n\n\ndef check(candidate):\n    assert candidate([1.0, 2.0, 3.9, 4.0, 5.0, 2.2], 0.3) == True\n    assert candidate([1.0, 2.0, 3.9, 4.0, 5.0, 2.2], 0.05) == False\n    assert candidate([1.0, 2.0, 5.9, 4.0, 5.0], 0.95) == True\n    assert candidate([1.0, 2.0, 5.9, 4.0, 5.0], 0.8) == False\n    assert candidate([1.0, 2.0, 3.0, 4.0, 5.0, 2.0], 0.1) == True\n    assert candidate([1.1, 2.2, 3.1, 4.1, 5.1], 1.0) == True\n    assert candidate([1.1, 2.2, 3.1, 4.1, 5.1], 0.5) == False\n\n"
+    }
+  },
+  {
+    "local_id": "HE_002",
+    "upstream": {
+      "task_id": "HumanEval/15",
+      "prompt": "\n\ndef string_sequence(n: int) -> str:\n    \"\"\" Return a string containing space-delimited numbers starting from 0 upto n inclusive.\n    >>> string_sequence(0)\n    '0'\n    >>> string_sequence(5)\n    '0 1 2 3 4 5'\n    \"\"\"\n",
+      "entry_point": "string_sequence",
+      "canonical_solution": "    return ' '.join([str(x) for x in range(n + 1)])\n",
+      "test": "\n\nMETADATA = {\n    'author': 'jt',\n    'dataset': 'test'\n}\n\n\ndef check(candidate):\n    assert candidate(0) == '0'\n    assert candidate(3) == '0 1 2 3'\n    assert candidate(10) == '0 1 2 3 4 5 6 7 8 9 10'\n"
+    }
+  },
+  {
+    "local_id": "HE_003",
+    "upstream": {
+      "task_id": "HumanEval/28",
+      "prompt": "from typing import List\n\n\ndef concatenate(strings: List[str]) -> str:\n    \"\"\" Concatenate list of strings into a single string\n    >>> concatenate([])\n    ''\n    >>> concatenate(['a', 'b', 'c'])\n    'abc'\n    \"\"\"\n",
+      "entry_point": "concatenate",
+      "canonical_solution": "    return ''.join(strings)\n",
+      "test": "\n\nMETADATA = {\n    'author': 'jt',\n    'dataset': 'test'\n}\n\n\ndef check(candidate):\n    assert candidate([]) == ''\n    assert candidate(['x', 'y', 'z']) == 'xyz'\n    assert candidate(['x', 'y', 'z', 'w', 'k']) == 'xyzwk'\n"
+    }
+  },
+  {
+    "local_id": "HE_004",
+    "upstream": {
+      "task_id": "HumanEval/14",
+      "prompt": "from typing import List\n\n\ndef all_prefixes(string: str) -> List[str]:\n    \"\"\" Return list of all prefixes from shortest to longest of the input string\n    >>> all_prefixes('abc')\n    ['a', 'ab', 'abc']\n    \"\"\"\n",
+      "entry_point": "all_prefixes",
+      "canonical_solution": "    result = []\n\n    for i in range(len(string)):\n        result.append(string[:i+1])\n    return result\n",
+      "test": "\n\nMETADATA = {\n    'author': 'jt',\n    'dataset': 'test'\n}\n\n\ndef check(candidate):\n    assert candidate('') == []\n    assert candidate('asdfgh') == ['a', 'as', 'asd', 'asdf', 'asdfg', 'asdfgh']\n    assert candidate('WWW') == ['W', 'WW', 'WWW']\n"
+    }
+  },
+  {
+    "local_id": "HE_005",
+    "upstream": {
+      "task_id": "HumanEval/43",
+      "prompt": "\n\ndef pairs_sum_to_zero(l):\n    \"\"\"\n    pairs_sum_to_zero takes a list of integers as an input.\n    it returns True if there are two distinct elements in the list that\n    sum to zero, and False otherwise.\n    >>> pairs_sum_to_zero([1, 3, 5, 0])\n    False\n    >>> pairs_sum_to_zero([1, 3, -2, 1])\n    False\n    >>> pairs_sum_to_zero([1, 2, 3, 7])\n    False\n    >>> pairs_sum_to_zero([2, 4, -5, 3, 5, 7])\n    True\n    >>> pairs_sum_to_zero([1])\n    False\n    \"\"\"\n",
+      "entry_point": "pairs_sum_to_zero",
+      "canonical_solution": "    for i, l1 in enumerate(l):\n        for j in range(i + 1, len(l)):\n            if l1 + l[j] == 0:\n                return True\n    return False\n",
+      "test": "\n\nMETADATA = {}\n\n\ndef check(candidate):\n    assert candidate([1, 3, 5, 0]) == False\n    assert candidate([1, 3, -2, 1]) == False\n    assert candidate([1, 2, 3, 7]) == False\n    assert candidate([2, 4, -5, 3, 5, 7]) == True\n    assert candidate([1]) == False\n\n    assert candidate([-3, 9, -1, 3, 2, 30]) == True\n    assert candidate([-3, 9, -1, 3, 2, 31]) == True\n    assert candidate([-3, 9, -1, 4, 2, 30]) == False\n    assert candidate([-3, 9, -1, 4, 2, 31]) == False\n\n"
+    }
+  },
+  {
+    "local_id": "HE_006",
+    "upstream": {
+      "task_id": "HumanEval/54",
+      "prompt": "\n\ndef same_chars(s0: str, s1: str):\n    \"\"\"\n    Check if two words have the same characters.\n    >>> same_chars('eabcdzzzz', 'dddzzzzzzzddeddabc')\n    True\n    >>> same_chars('abcd', 'dddddddabc')\n    True\n    >>> same_chars('dddddddabc', 'abcd')\n    True\n    >>> same_chars('eabcd', 'dddddddabc')\n    False\n    >>> same_chars('abcd', 'dddddddabce')\n    False\n    >>> same_chars('eabcdzzzz', 'dddzzzzzzzddddabc')\n    False\n    \"\"\"\n",
+      "entry_point": "same_chars",
+      "canonical_solution": "    return set(s0) == set(s1)\n",
+      "test": "\n\nMETADATA = {}\n\n\ndef check(candidate):\n    assert candidate('eabcdzzzz', 'dddzzzzzzzddeddabc') == True\n    assert candidate('abcd', 'dddddddabc') == True\n    assert candidate('dddddddabc', 'abcd') == True\n    assert candidate('eabcd', 'dddddddabc') == False\n    assert candidate('abcd', 'dddddddabcf') == False\n    assert candidate('eabcdzzzz', 'dddzzzzzzzddddabc') == False\n    assert candidate('aabb', 'aaccc') == False\n\n"
+    }
+  },
+  {
+    "local_id": "HE_007",
+    "upstream": {
+      "task_id": "HumanEval/58",
+      "prompt": "\n\ndef common(l1: list, l2: list):\n    \"\"\"Return sorted unique common elements for two lists.\n    >>> common([1, 4, 3, 34, 653, 2, 5], [5, 7, 1, 5, 9, 653, 121])\n    [1, 5, 653]\n    >>> common([5, 3, 2, 8], [3, 2])\n    [2, 3]\n\n    \"\"\"\n",
+      "entry_point": "common",
+      "canonical_solution": "    ret = set()\n    for e1 in l1:\n        for e2 in l2:\n            if e1 == e2:\n                ret.add(e1)\n    return sorted(list(ret))\n",
+      "test": "\n\nMETADATA = {}\n\n\ndef check(candidate):\n    assert candidate([1, 4, 3, 34, 653, 2, 5], [5, 7, 1, 5, 9, 653, 121]) == [1, 5, 653]\n    assert candidate([5, 3, 2, 8], [3, 2]) == [2, 3]\n    assert candidate([4, 3, 2, 8], [3, 2, 4]) == [2, 3, 4]\n    assert candidate([4, 3, 2, 8], []) == []\n\n"
+    }
+  },
+  {
+    "local_id": "HE_008",
+    "upstream": {
+      "task_id": "HumanEval/62",
+      "prompt": "\n\ndef derivative(xs: list):\n    \"\"\" xs represent coefficients of a polynomial.\n    xs[0] + xs[1] * x + xs[2] * x^2 + ....\n     Return derivative of this polynomial in the same form.\n    >>> derivative([3, 1, 2, 4, 5])\n    [1, 4, 12, 20]\n    >>> derivative([1, 2, 3])\n    [2, 6]\n    \"\"\"\n",
+      "entry_point": "derivative",
+      "canonical_solution": "    return [(i * x) for i, x in enumerate(xs)][1:]\n",
+      "test": "\n\nMETADATA = {}\n\n\ndef check(candidate):\n    assert candidate([3, 1, 2, 4, 5]) == [1, 4, 12, 20]\n    assert candidate([1, 2, 3]) == [2, 6]\n    assert candidate([3, 2, 1]) == [2, 2]\n    assert candidate([3, 2, 1, 0, 4]) == [2, 2, 0, 16]\n    assert candidate([1]) == []\n\n"
+    }
+  },
+  {
+    "local_id": "MB_001",
+    "upstream": {
+      "text": "Write a function to find the similar elements from the given two tuple lists.",
+      "code": "def similar_elements(test_tup1, test_tup2):\r\n  res = tuple(set(test_tup1) & set(test_tup2))\r\n  return (res) ",
+      "task_id": 2,
+      "test_setup_code": "",
+      "test_list": [
+        "assert similar_elements((3, 4, 5, 6),(5, 7, 4, 10)) == (4, 5)",
+        "assert similar_elements((1, 2, 3, 4),(5, 4, 3, 7)) == (3, 4)",
+        "assert similar_elements((11, 12, 14, 13),(17, 15, 14, 13)) == (13, 14)"
+      ],
+      "challenge_test_list": []
+    }
+  },
+  {
+    "local_id": "MB_002",
+    "upstream": {
+      "text": "Write a function to find squares of individual elements in a list using lambda function.",
+      "code": "def square_nums(nums):\r\n square_nums = list(map(lambda x: x ** 2, nums))\r\n return square_nums",
+      "task_id": 8,
+      "test_setup_code": "",
+      "test_list": [
+        "assert square_nums([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])==[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]",
+        "assert square_nums([10,20,30])==([100,400,900])",
+        "assert square_nums([12,15])==([144,225])"
+      ],
+      "challenge_test_list": []
+    }
+  },
+  {
+    "local_id": "MB_003",
+    "upstream": {
+      "text": "Write a python function to remove first and last occurrence of a given character from the string.",
+      "code": "def remove_Occ(s,ch): \r\n    for i in range(len(s)): \r\n        if (s[i] == ch): \r\n            s = s[0 : i] + s[i + 1:] \r\n            break\r\n    for i in range(len(s) - 1,-1,-1):  \r\n        if (s[i] == ch): \r\n            s = s[0 : i] + s[i + 1:] \r\n            break\r\n    return s ",
+      "task_id": 11,
+      "test_setup_code": "",
+      "test_list": [
+        "assert remove_Occ(\"hello\",\"l\") == \"heo\"",
+        "assert remove_Occ(\"abcda\",\"a\") == \"bcd\"",
+        "assert remove_Occ(\"PHP\",\"P\") == \"H\""
+      ],
+      "challenge_test_list": [
+        "assert remove_Occ(\"hellolloll\",\"l\") == \"helollol\"",
+        "assert remove_Occ(\"\",\"l\") == \"\""
+      ]
+    }
+  },
+  {
+    "local_id": "MB_004",
+    "upstream": {
+      "text": "Write a function to check if a substring is present in a given list of string values.",
+      "code": "def find_substring(str1, sub_str):\r\n   if any(sub_str in s for s in str1):\r\n       return True\r\n   return False",
+      "task_id": 91,
+      "test_setup_code": "",
+      "test_list": [
+        "assert find_substring([\"red\", \"black\", \"white\", \"green\", \"orange\"],\"ack\")==True",
+        "assert find_substring([\"red\", \"black\", \"white\", \"green\", \"orange\"],\"abc\")==False",
+        "assert find_substring([\"red\", \"black\", \"white\", \"green\", \"orange\"],\"ange\")==True"
+      ],
+      "challenge_test_list": []
+    }
+  },
+  {
+    "local_id": "MB_005",
+    "upstream": {
+      "text": "Write a python function to find smallest number in a list.",
+      "code": "def smallest_num(xs):\n  return min(xs)\n",
+      "task_id": 62,
+      "test_setup_code": "",
+      "test_list": [
+        "assert smallest_num([10, 20, 1, 45, 99]) == 1",
+        "assert smallest_num([1, 2, 3]) == 1",
+        "assert smallest_num([45, 46, 50, 60]) == 45"
+      ],
+      "challenge_test_list": []
+    }
+  },
+  {
+    "local_id": "MB_007",
+    "upstream": {
+      "text": "Write a function to search a literals string in a string and also find the location within the original string where the pattern occurs.",
+      "code": "import re\r\ndef search_literal(pattern,text):\r\n match = re.search(pattern, text)\r\n s = match.start()\r\n e = match.end()\r\n return (s, e)",
+      "task_id": 534,
+      "test_setup_code": "",
+      "test_list": [
+        "assert search_literal('python','python programming language')==(0,6)",
+        "assert search_literal('programming','python programming language')==(7,18)",
+        "assert search_literal('language','python programming language')==(19,27)"
+      ],
+      "challenge_test_list": []
+    }
+  }
+]

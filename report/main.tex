@@ -1,0 +1,33 @@
+\documentclass[10pt,conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage[T5,T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{graphicx,booktabs,tabularx,array}
+\usepackage{cite,xcolor,microtype,multirow,balance}
+\usepackage{algorithm,algpseudocode}
+\usepackage[hidelinks]{hyperref}
+\newtheorem{theorem}{Theorem}
+\newcommand{\vn}[1]{{\fontencoding{T5}\selectfont #1}}
+\title{Semantic Information Gain for Robust Human-in-the-Loop Program Synthesis:\\ A Partial Implementation and Controlled Evaluation}
+\author{\IEEEauthorblockN{\vn{Nguyễn Thành Đạt}, \vn{Đặng Bá Ty}, \vn{Nguyễn Tiến Vũ Bảo}}
+\IEEEauthorblockA{Faculty of Computer Science and Engineering\\
+Ho Chi Minh City University of Technology (HCMUT), VNU-HCM, Vietnam\\
+Supervisor: \vn{TS. Võ Thanh Hùng}\\
+Course CO3101: Integrated Artificial Intelligence Project, Semester 261}}
+\begin{document}
+\maketitle
+\input{sections/abstract}
+\begin{IEEEkeywords}
+Program synthesis, human-in-the-loop, information gain, clarification, partial implementation, reproducible evaluation
+\end{IEEEkeywords}
+\input{sections/introduction}
+\input{sections/method}
+\input{sections/experimental_setup}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/conclusion}
+\input{sections/acknowledgment}
+\balance
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

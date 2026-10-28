@@ -48,6 +48,7 @@ class LLMClient:
         provider: str | None = None,
         model: str | None = None,
         api_key: str | None = None,
+        base_url: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 4096,
     ):
@@ -57,10 +58,11 @@ class LLMClient:
         config = PROVIDER_CONFIG[self.provider]
         self.model = model or os.getenv("DEFAULT_MODEL") or os.getenv("LLM_MODEL") or config["default_model"]
         self.api_key = api_key or os.getenv(config["env_key"], "")
-        self.base_url = config["base_url"]
+        self.base_url = base_url or os.getenv("OPENAI_BASE_URL") or os.getenv("LLM_BASE_URL") or config["base_url"]
         self.temperature = temperature
         self.max_tokens = max_tokens
         self._client = None
+
 
     def _get_client(self):
         if self._client is not None:

@@ -116,7 +116,7 @@ def task_pool(task: dict, args, root: Path) -> list[str]:
         random.Random(f'{args.seed}:{task["id"]}').shuffle(codes)
         codes = codes[:args.top_k]
     else:
-        llm = LLMClient(provider=args.provider, model=args.model)
+        llm = LLMClient(provider=args.provider, model=args.model, base_url=getattr(args, 'base_url', None))
         if not llm.is_configured:
             raise ValueError(f'Missing API key for {args.provider}; enter it in the Kaggle notebook or set the environment variable')
         codes = llm.generate_multiple(task['description'], task['function_name'], task['params'], k=args.top_k)
@@ -293,6 +293,7 @@ def main(argv=None):
     p.add_argument('--dataset',type=Path,default=DEFAULT_DATASET)
     p.add_argument('--provider',choices=['gemini','openai','openrouter'],default='gemini')
     p.add_argument('--model',default=None)
+    p.add_argument('--base-url',default=None,help='Custom base URL for OpenAI-compatible endpoint')
     p.add_argument('--methods',default=','.join(METHODS))
     p.add_argument('--quick',action='store_true',help='One case per family (8 tasks)')
     p.add_argument('--max-tasks',type=int,default=None)
@@ -326,7 +327,7 @@ def main(argv=None):
             p.error(f'Missing {key}: manually enter the key in your Kaggle cell (or set the environment variable)')
     if args.mode == 'real':
         # Freeze the resolved model in the run identity, including env defaults.
-        args.model = LLMClient(provider=args.provider, model=args.model).model
+        args.model = LLMClient(provider=args.provider, model=args.model, base_url=args.base_url).model
     tasks = validate_dataset(json.loads(args.dataset.read_text(encoding='utf-8')))
     if args.quick:
         seen=set(); reduced=[]

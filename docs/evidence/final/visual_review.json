@@ -1,0 +1,39 @@
+{
+  "pages": 8,
+  "reviewed_all_pages": true,
+  "pages_1_to_7_pixel_identical_to_reviewed_render": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "page_8": "Reviewed after final-column balancing",
+  "pdf_sha256": "f76dbcd8ee1c60bd98f81e5fce65047bf62d6588fbcfab2d012609f53daf7658",
+  "undefined_references": false,
+  "overfull_boxes": false,
+  "checks": [
+    "Vietnamese author/supervisor names",
+    "formula layout",
+    "table wrapping/readability",
+    "references and captions",
+    "explicit implementation/evaluation limits"
+  ],
+  "slides": {
+    "pages": 12,
+    "reviewed_all_pages": true,
+    "pdf_sha256": "0914083ebf799c6fd485b400366212fa6200eac313dd482bd8b2e58a8101a0f2",
+    "undefined_references": false,
+    "overfull_boxes": false,
+    "checks": [
+      "Matched original Beamer theme and 16:9 format",
+      "Readable scope and result tables",
+      "Vietnamese author and supervisor names",
+      "Numbers generated from saved checkpoints",
+      "Percentage-point units and explicit partial-implementation limits",
+      "Actual replayed dedup case and unresolved stopping states"
+    ]
+  }
+}

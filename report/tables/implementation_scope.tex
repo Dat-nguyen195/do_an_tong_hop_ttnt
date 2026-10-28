@@ -1,0 +1,24 @@
+\begin{table*}[t]
+\centering
+\caption{Alignment with the original SEMSYNTH design. Implementation status is distinct from empirical validation.}
+\label{tab:implementation_scope}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}p{0.23\textwidth}p{0.17\textwidth}X@{}}
+\toprule
+Design component & Prototype status & Implementation/evaluation boundary \\ \midrule
+Specification parsing & Partial & Description, function name and parameters; no full constraint parser. \\
+47 features / XGBoost & Not integrated & Retained design; execution observations supply deterministic output partitions. \\
+Candidate initialization & Partial & LLM adapters or fixed banks; strategy--code AGA is not implemented. \\
+Information gain & Special case & Uniform priors and binary output partitions yield $H_b(p)$. \\
+Semantic templates & Partial & Dedup/sort wording in UI; I/O fallback. Wording disabled in measured Balanced runs. \\
+Atomic decomposition & Not integrated & Binary question form does not implement an NLP compound-question decomposer. \\
+Diversity penalty & Not integrated & Exact repeated-question suppression only, without the Jaccard penalty. \\
+Belief update & Partial & Hard filtering measured; optional soft weights unit-tested without noise evaluation. \\
+Contradiction recovery & Not integrated & No full consistency/recovery pipeline in the evaluated loop. \\
+Beam / length buckets & Not integrated & Small pools only; no large-space performance claim. \\
+AGA / regeneration & Not integrated & No strategy stage or feedback-conditioned re-synthesis. \\
+Oracle / termination & Implemented & Reference feedback in experiments; empty, single, budget or unresolved outcomes. \\
+UI / evidence runner & Implemented & Streamlit, shared pools, probe separation, checkpoint/CSV and replay. \\
+\bottomrule
+\end{tabularx}
+\end{table*}

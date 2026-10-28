@@ -1,0 +1,29 @@
+\section{DISCUSSION AND LIMITATIONS}\label{sec:discussion}
+\subsection{Cases from Saved Artifacts}
+\subsubsection{Selecting an Available Alternative}
+In the Qwen-labeled pilot, \texttt{SYN\_DEDUP\_01} contains two saved candidates after deduplication. The first returns \texttt{list(set(xs))}; the second uses a \texttt{seen} set and appends first occurrences to an ordered result. On \texttt{[4,1,4,2,1]}, the first produces \texttt{[1,2,4]} in the recorded Python environment, while the second produces \texttt{[4,1,2]}. The reference intention is to preserve first occurrences.
+
+Replaying the saved pool asks whether the first output, \texttt{[1,2,4]}, is intended on that input. The reference oracle answers No, eliminating the first candidate. One remains and passes 4/4 retained evaluation inputs. This is selection among existing alternatives, not code repair. The question, answer, partition identifiers, and chosen-code hash are preserved in the replay evidence.
+
+\subsubsection{Passing Tests Without Convergence}
+The Gemini-labeled \texttt{SYN\_DEDUP\_01} session asks no questions, stops with several candidates and no distinguishing probe, and passes its retained tests. Syntactically different implementations can agree on the available inputs. This observation only describes the bounded probe/evaluation sets. For example, dictionary-based duplicate removal and an equality-based loop can differ on unhashable values; no unrestricted equivalence claim follows from small integer-list tests.
+
+\subsubsection{Observed Baseline Failures and Coverage Limits}
+The saved Gemini parity pool begins with a majority-parity policy, whereas the reference for this variant selects even values. Balanced uses one question to select a passing alternative. The Qwen pilot contains two first-entry failures, on duplicate removal and parity. These are observed cases, not a general failure-frequency taxonomy.
+
+A separate architectural limitation is pool coverage: if no candidate satisfies the intended behavior, filtering cannot synthesize a missing solution. This is a hypothetical failure mechanism, not an additional measured case in the 32-case offline run whose reference is in each bank. AGA and feedback-conditioned regeneration remain relevant extensions of the original design, but their benefits have not been measured in this project.
+
+\subsection{Interactive Implementation}
+The Streamlit interface supports offline fixtures and provider adapters, displays a concrete binary question, records answers and filtering changes, and exposes tentative outcomes. Offline UI captures are supplied in the source artifact; they illustrate the interface rather than establish LLM generation quality or human usability. List-style parameter names such as \texttt{xs, ys} are needed for the current default type heuristic; names \texttt{a, b} may be inferred as numbers without explicit seed inputs.
+
+Execution uses AST policy checks, subprocesses, UTF-8 communication, timeout, and cache. This is local process isolation, not a hardened multi-tenant sandbox. The software suite exercises execution, candidate admission, filtering, bookkeeping, and Streamlit behavior; software-test success is separate from synthesis test success.
+
+\subsection{Threats to Validity}
+\textbf{Internal validity.} Candidate banks, reference programs, and test inputs are hand-authored and related. Exact probe overlap is removed, but structural similarity remains. Historical live-generation request IDs and token logs are unavailable; only saved-pool selection and evaluation can be re-executed exactly under the recorded protocol. The API model tag and private endpoint do not pin service implementation or weights.
+
+\textbf{External validity.} Thirty-two variants represent only eight small families, and each live-labeled pilot contains one variant per family. All tasks are standalone functions and use one selection seed. Generalization to independent tasks, larger codebases, third-party libraries, or other backends is unmeasured.
+
+\textbf{Construct validity.} Passing two to five retained inputs is not a proof of program correctness. Single-candidate convergence and finite-suite pass rate are different outcomes. Question count is an interaction-cost proxy, not user effort. No user study, noisy-oracle experiment, large-space scalability test, token-cost comparison, or significance test is claimed.
+
+\subsection{Roadmap toward the Full Design}
+First, extend independent task coverage and the provenance protocol. Next integrate the 47-feature extractor and train/calibrate $M(h,q)$, then evaluate atomic questions and diversity with candidate pools held fixed. Belief consistency and recovery require controlled noise studies. AGA and constraint-conditioned regeneration require coverage/regeneration experiments. Finally, tiered management needs scale measurements, and semantic wording needs a user assessment. These are future milestones rather than missing requirements for this partial course implementation.

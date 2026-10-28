@@ -1,0 +1,267 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\usepackage[utf8]{inputenc}
+\usepackage[T5,T1]{fontenc}
+\usepackage{booktabs,tabularx,array}
+\usepackage{amsmath,amssymb}
+\setbeamertemplate{navigation symbols}{}
+\newcommand{\vn}[1]{{\fontencoding{T5}\selectfont #1}}
+\newcommand{\source}[1]{\par\vfill{\scriptsize\color{gray}Source: #1\par}}
+
+\title[SEMSYNTH]{Semantic Information Gain for Robust\\Human-in-the-Loop Program Synthesis}
+\subtitle{A Partial Implementation and Controlled Evaluation}
+\author[N. T. Dat et al.]{\vn{Nguyễn Thành Đạt} (2410709) \and \vn{Đặng Bá Ty} (2213893) \and \vn{Nguyễn Tiến Vũ Bảo} (2410281)}
+\institute[HCMUT]{Faculty of Computer Science and Engineering\\
+Ho Chi Minh City University of Technology (HCMUT), VNU-HCM\\[0.2cm]
+Supervisor: \vn{TS. Võ Thanh Hùng}\\
+Course CO3101: Integrated Artificial Intelligence Project, Semester 261}
+\date{October 2026}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{1. Ambiguous specifications}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Specification: ``Remove duplicate elements.''}
+      \par\medskip
+      \begin{itemize}
+        \item Stable first occurrences: \texttt{[4, 1, 2]}.
+        \item Sorted unique values: \texttt{[1, 2, 4]}.
+      \end{itemize}
+      \par\medskip
+      Both interpretations fit the description for input \texttt{[4, 1, 4, 2, 1]}.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{SEMSYNTH interaction}
+        Generate a candidate pool, select a distinguishing question, and revise the pool after a Yes/No answer.
+      \end{block}
+      \par\medskip
+      The original design aims to reduce the effort of expressing intent. This project evaluates candidate selection; human effort has not been measured.
+    \end{column}
+  \end{columns}
+  \source{Supplied SEMSYNTH manuscript; course report, Introduction and Method}
+\end{frame}
+
+\begin{frame}{2. Original SEMSYNTH architecture}
+  \begin{enumerate}
+    \item \textbf{Specification parsing:} goals, constraints, and interface.
+    \item \textbf{Feature extraction:} 47 code, execution, and question features.
+    \item \textbf{AGA initialization:} generate strategies, then translate to code.
+    \item \textbf{Question selection:} semantic information gain and diversity.
+    \item \textbf{Oracle interaction:} atomic Yes/No clarification.
+    \item \textbf{Belief revision:} Bayesian updates and consistency checks.
+    \item \textbf{Termination / regeneration:} select a candidate or rebuild the pool.
+  \end{enumerate}
+  \par\medskip
+  \textbf{Course scope:} a bounded execution-based subset of this architecture.
+  \source{Supplied SEMSYNTH manuscript; course report, Method}
+\end{frame}
+
+\begin{frame}{3. Original feature model and question design}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{47-dimensional representation}
+      \begin{itemize}
+        \item 18 AST structural features.
+        \item 18 execution and semantic features.
+        \item 11 question-text features.
+      \end{itemize}
+      \par\medskip
+      XGBoost predicts satisfaction:
+      \[
+        M(h,q)=P(h\models q).
+      \]
+      \textbf{Not trained or integrated} in this prototype.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{Semantic question design}
+      \begin{itemize}
+        \item 85 templates in nine clusters.
+        \item Atomic decomposition of compound queries.
+        \item Diversity penalty on repeated aspects.
+      \end{itemize}
+      \[
+        IG_{\mathrm{final}}(q)=IG(q)-\lambda\max_{q'\in Q_{\mathrm{hist}}}\!\mathrm{Sim}(q,q').
+      \]
+      \textbf{Retained as design}; not evaluated as implemented modules.
+    \end{column}
+  \end{columns}
+  \source{Supplied SEMSYNTH manuscript; course report, Method}
+\end{frame}
+
+\begin{frame}{4. Information gain in the implemented special case}
+  \[
+    IG(q)=H(\mathcal H)-\sum_{a\in\{\mathrm{Yes,No}\}}P(a\mid q)H(\mathcal H\mid a,q).
+  \]
+  \textbf{Assumptions:} uniform priors, deterministic probe execution, exact feedback.
+  \par\medskip
+  For the question ``On input $x$, should the output equal $y$?'', let
+  $n=|\mathcal H|$ and $p=|\mathcal H_{\mathrm{Yes}}|/n$. For nonempty parts,
+  \begin{align*}
+    IG(q)&=\log_2 n-p\log_2(pn)-(1-p)\log_2((1-p)n)\\
+         &=-p\log_2p-(1-p)\log_2(1-p)=H_b(p).
+  \end{align*}
+  \begin{block}{Meaning for the prototype}
+    Balanced selection maximizes this score over available probe partitions.
+    With three candidates, a 1--2 split is the closest available balance.
+    Bounded probes can still leave candidates unresolved.
+  \end{block}
+  \source{Course report, Method: derivation and conditional query bound}
+\end{frame}
+
+\begin{frame}{5. Implementation scope}
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabularx}{\textwidth}{@{}p{0.35\textwidth}X@{}}
+    \toprule
+    \textbf{Component} & \textbf{Evaluated status}\\ \midrule
+    Candidate pool and execution & Adapters / fixed banks, admission, deduplication, isolated execution.\\
+    Question selection & Binary entropy over bounded I/O probe partitions.\\
+    Belief update & Hard filtering measured; optional soft updates have unit tests only.\\
+    Oracle and stopping & Noiseless reference oracle; single, empty, budget, or unresolved states.\\
+    UI and experiments & Streamlit, shared pools, checkpoints, CSV, replay.\\
+    Remaining original modules & 47-feature mapping, full atomic/diversity, AGA, consistency recovery, hierarchy, and regeneration not integrated.\\
+    \bottomrule
+  \end{tabularx}
+  \source{Course report, Implementation Scope; current src/ and experiment configuration}
+\end{frame}
+
+\begin{frame}{6. Evaluation data and pilot provenance}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Measured benchmark: 32 synthetic cases}
+      \begin{itemize}
+        \item Eight related template families, four variants each.
+        \item Dedup, sorting, intersection, parity, case, trim, threshold, palindrome.
+        \item Offline: three candidates per bank, including a reference solution.
+        \item Two saved LLM-labeled pilots: eight synthetic cases each.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{Separate pilot catalog: 15 local tasks}
+      \begin{itemize}
+        \item HumanEval / MBPP sources checked; 46 local tests pass.
+        \item MBPP IDs corrected to 2 and 91 for two tasks.
+        \item Uppercase count is local; literal search adapts MBPP/534.
+        \item Local tests are reduced/adapted, not an official benchmark suite.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \source{config/; docs/dataset\_catalog.csv; dataset\_audit.json and synthetic\_audit.json}
+\end{frame}
+
+\begin{frame}{7. Controlled evaluation protocol}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Shared ordered pool per task}
+      \begin{itemize}
+        \item Direct-1: first candidate, no questions.
+        \item First-valid: first admitted candidate, no questions.
+        \item Balanced: entropy-based questions and hard filtering.
+      \end{itemize}
+      \par\medskip
+      Seed 3101, requested $K=3$, at most three questions and eight probe inputs. Saved pilot pools contain two or three candidates.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{Exact-input separation}
+      \[
+        X_{\mathrm{eval,clean}}=X_{\mathrm{eval}}\setminus X_{\mathrm{probes}}.
+      \]
+      \begin{itemize}
+        \item Offline: 33 of 160 input instances excluded; 127 retained.
+        \item Each eight-case pilot: 31 retained input instances.
+        \item Success means passing all retained tests for a case.
+      \end{itemize}
+      \par\medskip
+      Reference feedback is noiseless. Input separation does not establish generalization to new task families.
+    \end{column}
+  \end{columns}
+  \source{Saved run manifests/checkpoints; course report, Experimental Setup}
+\end{frame}
+
+\begin{frame}{8. Controlled offline results}
+  \centering
+  \input{tables/offline_by_family}
+  \par\medskip
+  \raggedright
+  \begin{itemize}
+    \item Balanced: \textbf{32/32} finite-suite case successes vs. \textbf{13/32} for each baseline.
+    \item Difference: \textbf{+59.375 percentage points}; mean \textbf{1.4688 questions}.
+    \item Reference is in every bank. This measures selection under controlled ambiguity.
+  \end{itemize}
+  \source{Offline run e6a84cf2098af752; table generated from saved checkpoints}
+\end{frame}
+
+\begin{frame}{9. Saved LLM-labeled pilot pools}
+  \centering
+  \input{tables/pilot_results}
+  \par\medskip
+  \raggedright
+  \begin{itemize}
+    \item Eight synthetic cases per recorded identifier; common pool across selectors.
+    \item Balanced gains: +12.5 and +25.0 percentage points over Direct-1.
+    \item Checks replay saved pools. Original API calls, model weights, tokens, and generation latency are not independently reverified.
+  \end{itemize}
+  \source{Runs 8be202264a584167 and b6c988199ed7b1d5; saved manifests/checkpoints}
+\end{frame}
+
+\begin{frame}{10. Replayed clarification and stopping states}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Qwen-labeled dedup case}
+      \par\medskip
+      Input: \texttt{[4, 1, 4, 2, 1]}.
+      \begin{itemize}
+        \item Candidate 1: \texttt{list(set(xs))}.
+        \item Candidate 2: stable first occurrences.
+      \end{itemize}
+      \par\medskip
+      Question: ``Should the output equal \texttt{[1, 2, 4]}?''
+      \par\medskip
+      Reference answer: \textbf{No}. One candidate remains, returning \texttt{[4, 1, 2]}; all four retained tests pass.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{Balanced stopping states}
+      \par\medskip
+      \input{tables/stopping}
+      \par\medskip
+      Unresolved means no distinguishing question was found in the bounded probes. It does not prove functional equivalence.
+      \par\medskip
+      A single survivor also does not prove correctness on all inputs.
+    \end{column}
+  \end{columns}
+  \source{evidence\_replay.json; SYN\_DEDUP\_01 and stopping counts from saved checkpoints}
+\end{frame}
+
+\begin{frame}{11. Conclusions and remaining original modules}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Implemented and measured}
+      \begin{itemize}
+        \item Execution-based binary clarification and hard filtering on small pools.
+        \item 32/32 controlled offline successes with a reference in every bank.
+        \item Saved pilot selection: 8/8 per identifier on retained finite test suites.
+      \end{itemize}
+      \par\medskip
+      Results support this subset under the stated protocol. Human effort, noisy feedback, and broad generation accuracy remain unmeasured.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{Original design retained for future integration}
+      \begin{itemize}
+        \item Train and calibrate 47-feature $M(h,q)$.
+        \item Integrate atomic questions and diversity.
+        \item Add consistency recovery, two-stage AGA, and regeneration.
+        \item Evaluate larger spaces and real users.
+      \end{itemize}
+      \par\medskip
+      \centering\Large Thank you
+    \end{column}
+  \end{columns}
+  \source{Course report, Discussion and Conclusion; supplied SEMSYNTH design}
+\end{frame}
+
+\end{document}

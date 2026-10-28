@@ -279,7 +279,7 @@ class TestProjectStructure:
         "tests/__init__.py",
         "tests/test_baseline.py",
         "config/dataset_sample.json",
-        "docs/phase1_report.md",
+        "report/README.md",
         "requirements.txt",
         ".env.example",
         ".gitignore",

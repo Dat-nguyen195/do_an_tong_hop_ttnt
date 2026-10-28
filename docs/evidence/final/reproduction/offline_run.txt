@@ -1,0 +1,108 @@
+RUN e6a84cf2098af752 | mode=offline | tasks=32/32 | methods=['direct1', 'first_valid', 'balanced']
+SYN_DEDUP_01 direct1: 4/4 questions=0 sec=0.03
+SYN_DEDUP_01 first_valid: 4/4 questions=0 sec=0.03
+SYN_DEDUP_01 balanced: 4/4 questions=1 sec=0.16
+SYN_DEDUP_02 direct1: 4/4 questions=0 sec=0.03
+SYN_DEDUP_02 first_valid: 4/4 questions=0 sec=0.03
+SYN_DEDUP_02 balanced: 4/4 questions=1 sec=0.16
+SYN_DEDUP_03 direct1: 0/4 questions=0 sec=0.03
+SYN_DEDUP_03 first_valid: 0/4 questions=0 sec=0.04
+SYN_DEDUP_03 balanced: 4/4 questions=2 sec=0.18
+SYN_DEDUP_04 direct1: 0/4 questions=0 sec=0.03
+SYN_DEDUP_04 first_valid: 0/4 questions=0 sec=0.04
+SYN_DEDUP_04 balanced: 4/4 questions=2 sec=0.18
+SYN_SORTING_01 direct1: 1/4 questions=0 sec=0.03
+SYN_SORTING_01 first_valid: 1/4 questions=0 sec=0.03
+SYN_SORTING_01 balanced: 4/4 questions=2 sec=0.18
+SYN_SORTING_02 direct1: 4/4 questions=0 sec=0.04
+SYN_SORTING_02 first_valid: 4/4 questions=0 sec=0.03
+SYN_SORTING_02 balanced: 4/4 questions=1 sec=0.15
+SYN_SORTING_03 direct1: 1/4 questions=0 sec=0.03
+SYN_SORTING_03 first_valid: 1/4 questions=0 sec=0.03
+SYN_SORTING_03 balanced: 4/4 questions=2 sec=0.16
+SYN_SORTING_04 direct1: 1/4 questions=0 sec=0.04
+SYN_SORTING_04 first_valid: 1/4 questions=0 sec=0.03
+SYN_SORTING_04 balanced: 4/4 questions=2 sec=0.15
+SYN_INTERSECTION_01 direct1: 5/5 questions=0 sec=0.03
+SYN_INTERSECTION_01 first_valid: 5/5 questions=0 sec=0.03
+SYN_INTERSECTION_01 balanced: 5/5 questions=1 sec=0.16
+SYN_INTERSECTION_02 direct1: 1/5 questions=0 sec=0.04
+SYN_INTERSECTION_02 first_valid: 1/5 questions=0 sec=0.03
+SYN_INTERSECTION_02 balanced: 5/5 questions=1 sec=0.17
+SYN_INTERSECTION_03 direct1: 1/5 questions=0 sec=0.04
+SYN_INTERSECTION_03 first_valid: 1/5 questions=0 sec=0.04
+SYN_INTERSECTION_03 balanced: 5/5 questions=1 sec=0.20
+SYN_INTERSECTION_04 direct1: 1/5 questions=0 sec=0.04
+SYN_INTERSECTION_04 first_valid: 1/5 questions=0 sec=0.04
+SYN_INTERSECTION_04 balanced: 5/5 questions=2 sec=0.20
+SYN_PARITY_01 direct1: 0/3 questions=0 sec=0.04
+SYN_PARITY_01 first_valid: 0/3 questions=0 sec=0.04
+SYN_PARITY_01 balanced: 3/3 questions=2 sec=0.18
+SYN_PARITY_02 direct1: 0/3 questions=0 sec=0.04
+SYN_PARITY_02 first_valid: 0/3 questions=0 sec=0.04
+SYN_PARITY_02 balanced: 3/3 questions=2 sec=0.27
+SYN_PARITY_03 direct1: 0/4 questions=0 sec=0.07
+SYN_PARITY_03 first_valid: 0/4 questions=0 sec=0.04
+SYN_PARITY_03 balanced: 4/4 questions=2 sec=0.22
+SYN_PARITY_04 direct1: 4/4 questions=0 sec=0.05
+SYN_PARITY_04 first_valid: 4/4 questions=0 sec=0.05
+SYN_PARITY_04 balanced: 4/4 questions=1 sec=0.22
+SYN_CASE_01 direct1: 1/4 questions=0 sec=0.05
+SYN_CASE_01 first_valid: 1/4 questions=0 sec=0.04
+SYN_CASE_01 balanced: 4/4 questions=2 sec=0.19
+SYN_CASE_02 direct1: 4/4 questions=0 sec=0.04
+SYN_CASE_02 first_valid: 4/4 questions=0 sec=0.04
+SYN_CASE_02 balanced: 4/4 questions=1 sec=0.18
+SYN_CASE_03 direct1: 4/4 questions=0 sec=0.04
+SYN_CASE_03 first_valid: 4/4 questions=0 sec=0.04
+SYN_CASE_03 balanced: 4/4 questions=1 sec=0.18
+SYN_CASE_04 direct1: 4/4 questions=0 sec=0.03
+SYN_CASE_04 first_valid: 4/4 questions=0 sec=0.04
+SYN_CASE_04 balanced: 4/4 questions=1 sec=0.19
+SYN_TRIM_01 direct1: 4/4 questions=0 sec=0.04
+SYN_TRIM_01 first_valid: 4/4 questions=0 sec=0.04
+SYN_TRIM_01 balanced: 4/4 questions=1 sec=0.18
+SYN_TRIM_02 direct1: 4/4 questions=0 sec=0.03
+SYN_TRIM_02 first_valid: 4/4 questions=0 sec=0.04
+SYN_TRIM_02 balanced: 4/4 questions=1 sec=0.19
+SYN_TRIM_03 direct1: 4/4 questions=0 sec=0.04
+SYN_TRIM_03 first_valid: 4/4 questions=0 sec=0.03
+SYN_TRIM_03 balanced: 4/4 questions=1 sec=0.16
+SYN_TRIM_04 direct1: 1/4 questions=0 sec=0.04
+SYN_TRIM_04 first_valid: 1/4 questions=0 sec=0.03
+SYN_TRIM_04 balanced: 4/4 questions=2 sec=0.17
+SYN_THRESHOLD_01 direct1: 1/4 questions=0 sec=0.04
+SYN_THRESHOLD_01 first_valid: 1/4 questions=0 sec=0.04
+SYN_THRESHOLD_01 balanced: 4/4 questions=2 sec=0.20
+SYN_THRESHOLD_02 direct1: 2/4 questions=0 sec=0.03
+SYN_THRESHOLD_02 first_valid: 2/4 questions=0 sec=0.04
+SYN_THRESHOLD_02 balanced: 4/4 questions=1 sec=0.18
+SYN_THRESHOLD_03 direct1: 3/5 questions=0 sec=0.04
+SYN_THRESHOLD_03 first_valid: 3/5 questions=0 sec=0.04
+SYN_THRESHOLD_03 balanced: 5/5 questions=2 sec=0.22
+SYN_THRESHOLD_04 direct1: 1/2 questions=0 sec=0.03
+SYN_THRESHOLD_04 first_valid: 1/2 questions=0 sec=0.04
+SYN_THRESHOLD_04 balanced: 2/2 questions=1 sec=0.17
+SYN_PALINDROME_01 direct1: 2/3 questions=0 sec=0.04
+SYN_PALINDROME_01 first_valid: 2/3 questions=0 sec=0.04
+SYN_PALINDROME_01 balanced: 3/3 questions=2 sec=0.22
+SYN_PALINDROME_02 direct1: 4/4 questions=0 sec=0.04
+SYN_PALINDROME_02 first_valid: 4/4 questions=0 sec=0.05
+SYN_PALINDROME_02 balanced: 4/4 questions=1 sec=0.23
+SYN_PALINDROME_03 direct1: 3/3 questions=0 sec=0.04
+SYN_PALINDROME_03 first_valid: 3/3 questions=0 sec=0.04
+SYN_PALINDROME_03 balanced: 3/3 questions=2 sec=0.21
+SYN_PALINDROME_04 direct1: 2/4 questions=0 sec=0.04
+SYN_PALINDROME_04 first_valid: 2/4 questions=0 sec=0.04
+SYN_PALINDROME_04 balanced: 4/4 questions=1 sec=0.19
+{
+  "run_id": "e6a84cf2098af752",
+  "expected": 96,
+  "completed": 96,
+  "shard_expected": 96,
+  "shard_completed": 96,
+  "all_complete": true,
+  "shard_complete": true
+}
+Archive: /tmp/semsynth-release-onwtmt8h/new_results/e6a84cf2098af752/SEMSYNTH_RESULTS.zip
+New task-method checkpoints: 96

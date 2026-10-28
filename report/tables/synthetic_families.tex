@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\caption{Eight related template families. Reference intent varies across the four cases in each family.}
+\label{tab:synthetic_families}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}llp{0.33\textwidth}X@{}}
+\toprule
+Family & Cases & Interface & Target interpretations across variants \\ \midrule
+dedup & 4 & \texttt{remove\_duplicates(xs)} & Stable first occurrences or sorted unique values \\
+sorting & 4 & \texttt{sort\_numbers(xs)} & Ascending or descending order \\
+intersection & 4 & \texttt{common\_elements(a, b)} & Sorted unique intersection or original-order multiplicity \\
+parity & 4 & \texttt{select\_numbers(xs)} & Even or odd values \\
+case & 4 & \texttt{normalize\_text(s)} & Lowercase or uppercase \\
+trim & 4 & \texttt{clean\_text(s)} & Both-side or left-only trimming \\
+threshold & 4 & \texttt{is\_large(x, threshold)} & Strict or inclusive lower bound \\
+palindrome & 4 & \texttt{is\_palindrome(s)} & Case-sensitive or case-insensitive symmetry \\
+\bottomrule
+\end{tabularx}
+\par\smallskip Every offline bank has three candidate implementations and includes its reference; each case starts with five evaluation inputs.
+\end{table*}

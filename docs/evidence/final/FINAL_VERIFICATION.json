@@ -1,0 +1,76 @@
+{
+  "fresh_virtualenv": true,
+  "dependencies_installed_from": "requirements.lock.txt",
+  "tests": {
+    "tests": 107,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "offline_summary_matches": true,
+  "api_calls_made": 0,
+  "live_generation_reexecuted": false,
+  "steps": {
+    "create_venv": {
+      "exit_code": 0,
+      "elapsed_s": 3.813,
+      "log": "create_venv.txt"
+    },
+    "install": {
+      "exit_code": 0,
+      "elapsed_s": 52.768,
+      "log": "install.txt"
+    },
+    "pip_check": {
+      "exit_code": 0,
+      "elapsed_s": 1.062,
+      "log": "pip_check.txt"
+    },
+    "pytest": {
+      "exit_code": 0,
+      "elapsed_s": 6.041,
+      "log": "pytest.txt"
+    },
+    "preflight": {
+      "exit_code": 0,
+      "elapsed_s": 0.145,
+      "log": "preflight.txt"
+    },
+    "demo": {
+      "exit_code": 0,
+      "elapsed_s": 0.344,
+      "log": "demo.txt"
+    },
+    "offline_run": {
+      "exit_code": 0,
+      "elapsed_s": 9.748,
+      "log": "offline_run.txt"
+    },
+    "evidence_replay": {
+      "exit_code": 0,
+      "elapsed_s": 15.605,
+      "log": "evidence_replay.txt"
+    },
+    "latex_build": {
+      "exit_code": 0,
+      "elapsed_s": 5.699,
+      "log": "latex_build.txt"
+    },
+    "slide_tables": {
+      "exit_code": 0,
+      "elapsed_s": 0.045,
+      "log": "slide_tables.txt"
+    },
+    "slides_build": {
+      "exit_code": 0,
+      "elapsed_s": 3.976,
+      "log": "slides_build.txt"
+    },
+    "environment": {
+      "exit_code": 0,
+      "elapsed_s": 0.572,
+      "log": "installed_packages.txt"
+    }
+  },
+  "source_verification_snapshot_sha256": "7cea714bb51847536548f9701a40e7fe978a1a0880c9331ce753226cacb9713a"
+}

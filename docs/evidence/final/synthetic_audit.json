@@ -1,0 +1,106 @@
+{
+  "dataset_sha256": "6f91b5f7ab022418b153b4d580fac9012ebd0147bd0c638d63ee7c2e53de2e75",
+  "case_count": 32,
+  "family_count": 8,
+  "reference_in_every_bank": true,
+  "cases_not_independent": true,
+  "families": {
+    "dedup": {
+      "cases": [
+        "SYN_DEDUP_01",
+        "SYN_DEDUP_02",
+        "SYN_DEDUP_03",
+        "SYN_DEDUP_04"
+      ],
+      "reference_interpretations": [
+        "def remove_duplicates(xs):\n    return list(dict.fromkeys(xs))",
+        "def remove_duplicates(xs):\n    return sorted(set(xs))"
+      ]
+    },
+    "sorting": {
+      "cases": [
+        "SYN_SORTING_01",
+        "SYN_SORTING_02",
+        "SYN_SORTING_03",
+        "SYN_SORTING_04"
+      ],
+      "reference_interpretations": [
+        "def sort_numbers(xs):\n    return sorted(xs)",
+        "def sort_numbers(xs):\n    return sorted(xs, reverse=True)"
+      ]
+    },
+    "intersection": {
+      "cases": [
+        "SYN_INTERSECTION_01",
+        "SYN_INTERSECTION_02",
+        "SYN_INTERSECTION_03",
+        "SYN_INTERSECTION_04"
+      ],
+      "reference_interpretations": [
+        "def common_elements(a, b):\n    return sorted(set(a) & set(b))",
+        "def common_elements(a, b):\n    return [x for x in a if x in b]"
+      ]
+    },
+    "parity": {
+      "cases": [
+        "SYN_PARITY_01",
+        "SYN_PARITY_02",
+        "SYN_PARITY_03",
+        "SYN_PARITY_04"
+      ],
+      "reference_interpretations": [
+        "def select_numbers(xs):\n    return [x for x in xs if x % 2 == 0]",
+        "def select_numbers(xs):\n    return [x for x in xs if x % 2 != 0]"
+      ]
+    },
+    "case": {
+      "cases": [
+        "SYN_CASE_01",
+        "SYN_CASE_02",
+        "SYN_CASE_03",
+        "SYN_CASE_04"
+      ],
+      "reference_interpretations": [
+        "def normalize_text(s):\n    return s.lower()",
+        "def normalize_text(s):\n    return s.upper()"
+      ]
+    },
+    "trim": {
+      "cases": [
+        "SYN_TRIM_01",
+        "SYN_TRIM_02",
+        "SYN_TRIM_03",
+        "SYN_TRIM_04"
+      ],
+      "reference_interpretations": [
+        "def clean_text(s):\n    return s.strip()",
+        "def clean_text(s):\n    return s.lstrip()"
+      ]
+    },
+    "threshold": {
+      "cases": [
+        "SYN_THRESHOLD_01",
+        "SYN_THRESHOLD_02",
+        "SYN_THRESHOLD_03",
+        "SYN_THRESHOLD_04"
+      ],
+      "reference_interpretations": [
+        "def is_large(x, threshold):\n    return x > threshold",
+        "def is_large(x, threshold):\n    return x >= threshold"
+      ]
+    },
+    "palindrome": {
+      "cases": [
+        "SYN_PALINDROME_01",
+        "SYN_PALINDROME_02",
+        "SYN_PALINDROME_03",
+        "SYN_PALINDROME_04"
+      ],
+      "reference_interpretations": [
+        "def is_palindrome(s):\n    return s == s[::-1]",
+        "def is_palindrome(s):\n    return s.lower() == s.lower()[::-1]"
+      ]
+    }
+  },
+  "execution_checks": "See evidence_replay.json: all saved tasks recompute reference outputs and verify held-out scores."
+}

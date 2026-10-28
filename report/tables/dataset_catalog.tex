@@ -1,0 +1,27 @@
+\begin{table*}[t]
+\centering
+\caption{Pilot provenance audit (15 tasks). These tasks are not the measured 32-case benchmark.}
+\label{tab:dataset_catalog}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}lllX@{}}
+\toprule
+Local ID & Legacy ID & Audited source & Contract/adaptation boundary \\ \midrule
+HE\_001 & HumanEval/0 & HumanEval/0 & Source contract checked; local tests reduced/adapted. \\
+HE\_002 & HumanEval/15 & HumanEval/15 & Source contract checked; local tests reduced/adapted. \\
+HE\_003 & HumanEval/28 & HumanEval/28 & Source contract checked; local tests reduced/adapted. \\
+HE\_004 & HumanEval/14 & HumanEval/14 & Source contract checked; local tests reduced/adapted. \\
+HE\_005 & HumanEval/43 & HumanEval/43 & Source contract checked; local tests reduced/adapted. \\
+HE\_006 & HumanEval/54 & HumanEval/54 & Source contract checked; local tests reduced/adapted. \\
+HE\_007 & HumanEval/58 & HumanEval/58 & Source contract checked; local tests reduced/adapted. \\
+HE\_008 & HumanEval/62 & HumanEval/62 & Source contract checked; local tests reduced/adapted. \\
+MB\_001 & MBPP/1 & MBPP/2 & ID corrected; tuples represented as JSON lists. \\
+MB\_002 & MBPP/8 & MBPP/8 & Source contract checked; local tests reduced/adapted. \\
+MB\_003 & MBPP/11 & MBPP/11 & Removes first and last occurrences. \\
+MB\_004 & MBPP/56 & MBPP/91 & ID corrected; local parameter name differs. \\
+MB\_005 & MBPP/62 & MBPP/62 & Source contract checked; local tests reduced/adapted. \\
+MB\_006 & MBPP/105 & Local only & Local ASCII-uppercase task; no source verified. \\
+MB\_007 & MBPP/119 & MBPP/534 & MBPP/534 adaptation: integer index instead of span. \\
+\bottomrule
+\end{tabularx}
+\par\smallskip Thirteen upstream contracts are checked against local tests; two local/adapted contracts are kept separate. URLs, licenses, hashes and 46 local-test checks are included in the CSV and audit evidence.
+\end{table*}

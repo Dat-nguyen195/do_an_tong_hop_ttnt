@@ -1,4 +1,0 @@
-method,completed_tasks,passed_tasks,pass_rate_on_completed,mean_questions,mean_elapsed_s,reported_as_full_benchmark
-direct1,32,13,0.40625,0.0,0.1351,True
-first_valid,32,13,0.40625,0.0,0.1382,True
-balanced,32,32,1.0,1.4688,0.7309,True

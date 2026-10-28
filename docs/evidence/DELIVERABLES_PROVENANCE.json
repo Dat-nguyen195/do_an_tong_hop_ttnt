@@ -1,0 +1,49 @@
+{
+  "checked_on": "2026-10-28",
+  "project": "SEMSYNTH CO3101 partial implementation",
+  "scope_excludes": [
+    "video"
+  ],
+  "git_head": "69ae932bfb1ce3303fb95869b17c1096fed8cb50",
+  "source_manifest_sha256": "7eb60fafb5e73bc9c4ce5369d9c5103b91e1374a97710b9550b132c1c1a55c61",
+  "working_tree_note": "Archive member hashes identify the actual local snapshot; Git HEAD alone does not.",
+  "artifacts": {
+    "semsynth_source.zip": {
+      "sha256": "81f753681da5c9e7852280e0c3335a581174d6a6d7968b79a13aa618297edc44",
+      "bytes": 1123280
+    },
+    "semsynth_evidence.zip": {
+      "sha256": "dceb6a84e72eb065d8f6e4482f53d11f1263f8572b86b04b781475ef91dfc368",
+      "bytes": 186061
+    },
+    "SEMSYNTH_Report_CO3101.pdf": {
+      "sha256": "f76dbcd8ee1c60bd98f81e5fce65047bf62d6588fbcfab2d012609f53daf7658",
+      "bytes": 286464
+    },
+    "SEMSYNTH_Slides_CO3101.pdf": {
+      "sha256": "0914083ebf799c6fd485b400366212fa6200eac313dd482bd8b2e58a8101a0f2",
+      "bytes": 294000
+    }
+  },
+  "report_pages": 8,
+  "slide_count": 12,
+  "verification": {
+    "fresh_virtualenv": true,
+    "tests": {
+      "tests": 107,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    },
+    "saved_records_replayed": 150,
+    "offline_summary_matches": true,
+    "latex_build": "PASS",
+    "slides_build": "PASS",
+    "api_calls_made": 0,
+    "known_project_credentials_absent": true,
+    "video_members_absent": true,
+    "obsolete_documents_absent": true,
+    "slide_source_and_pdf_included": true
+  },
+  "historical_live_generation_limit": "Saved model identifiers/pools are retained; original provider requests and pinned model weight digests are unavailable."
+}

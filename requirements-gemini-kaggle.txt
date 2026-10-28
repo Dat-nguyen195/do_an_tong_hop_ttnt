@@ -1,3 +1,0 @@
-# Minimal Gemini-only requirements for the Kaggle one-cell runner.
--r requirements-kaggle.txt
-google-genai>=1.0.0,<2

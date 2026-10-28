@@ -1,16 +1,18 @@
-# SEMSYNTH Kaggle — one cell + manual Gemini key
+# Chạy SEMSYNTH trên Kaggle
 
-1. Create a Kaggle notebook and turn **Internet ON** (Accelerator: None).
-2. Upload both the **original** `do_an_tong_hop_ttnt-tydeptrai.zip` and this **changes-only** `SEMSYNTH_KAGGLE_EXPLAIN_PATCH.zip` as Kaggle inputs. Alternatively, set `REPO_URL` to an updated GitHub repo and optionally attach the patch ZIP.
-3. Open `notebooks/KAGGLE_ONE_CELL.ipynb` (or paste the single code cell in `KAGGLE_PASTE_ONE_CELL.py`).
-4. Type the Gemini API key when prompted (hidden input). You can instead assign `GEMINI_API_KEY = "..."` at the top, but then the notebook source contains your secret.
-5. Keep `PROFILE = "pilot"` (eight tasks / eight template families) for the first real API run. Set `PROFILE = "smoke"` for a one-task connectivity check, or `PROFILE = "full"` to run the full 32-case synthetic benchmark. Keep the same profile/model/settings for checkpoint resume.
-6. Download `/kaggle/working/SEMSYNTH_RESULTS.zip` from Kaggle Outputs. The archive includes `summary.csv`, `per_task.csv`, `runtime.csv`, `explanations.jsonl`, `runs.jsonl`, `manifest.json`, and `completeness.json`.
+Kaggle là lựa chọn bổ sung khi cần môi trường cloud; chạy local theo README vẫn là đường chính để hoàn thành đồ án.
 
-**Scope:** `proposed_explain` uses exactly the same question selection and Bayesian updates as `proposed`. Only the grounded explanation and decision trace are added. The clarity benefit cannot be established scientifically without a user study.
+Chỉ giữ một notebook: `kaggle_quickstart.ipynb`. Nó dùng source project đầy đủ qua GitHub hoặc một ZIP, không cần patch ZIP hay marker.
 
-**Fairness:** The benchmark's reference code is used for simulated user responses and evaluation, never Gemini's prompts. The 32 cases belong to eight synthetic families. `oracle_upper_bound` is not a deployable baseline.
+1. Tạo Kaggle notebook, bật Internet; CPU đủ, không yêu cầu GPU.
+2. Mở `kaggle_quickstart.ipynb`. Điền `REPO_URL` tới repository chứa bản source hiện tại; nếu chưa đồng bộ GitHub, upload ZIP source đầy đủ vào Kaggle Inputs.
+3. Giữ `MODE="offline"` để thử 32 ca tổng hợp; `QUICK=True` chạy một bài mỗi họ. Các phương pháp chính là `direct1,first_valid,balanced`.
+4. Nếu chạy thật, tạo Kaggle Secret theo provider: `GEMINI_API_KEY`, `OPENAI_API_KEY` hoặc `OPENROUTER_API_KEY`; cho notebook quyền dùng secret. Đặt `MODE="real"`, điền `MODEL` đã kiểm tra truy cập, dùng `QUICK=True, MAX_TASKS=1` để smoke trước.
+5. Khi smoke thành công, dùng `QUICK=True, MAX_TASKS=None` để chạy 8 họ, cùng K=3/Q=3/seed 3101. Không coi đây là benchmark HumanEval/MBPP vì bộ bài vẫn là synthetic.
+6. Download `SEMSYNTH_RESULTS.zip` trong `/kaggle/working/semsynth_results/<run_id>/`. Kiểm tra `completeness.json` và lưu pool/checkpoint/CSV/manifest trước khi kết thúc session.
 
-**API limits:** Calls to Gemini require external access, account permissions, and sufficient usage quota. A local patch check cannot guarantee those. The notebook does not silently switch from live Gemini to mocked generations.
+ZIP source cần chứa `run_experiments.py` và `config/ambiguity_benchmark.json`. Không đưa `.venv`, cache, khóa hoặc backup dọn dẹp vào ZIP. Source ở GitHub phải có cùng thay đổi với local nếu dùng đường clone.
 
-**Checkpointing:** Re-running within a Kaggle session keeps `/kaggle/working/semsynth_results`, and completed task-method records are reused. Download results before closing the session. A fully fresh Kaggle session has no saved checkpoints unless you restore them.
+Resume chỉ phù hợp cùng source/data/config/model/methods. Session mới cần khôi phục output nếu muốn tiếp tục checkpoint. Không có fallback tự động từ LLM thật về mock khi API lỗi.
+
+Soft belief, explanation và sharding còn trong code như phần mở rộng; chỉ thêm chúng vào thực nghiệm sau khi đã xong cấu hình chính. `scripts/merge_shards.py` giữ lại cho nhu cầu này.

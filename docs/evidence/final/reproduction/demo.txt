@@ -1,0 +1,5 @@
+
+=== OFFLINE SEMSYNTH SUITE ===
+{"case": "remove_duplicates", "success": true, "total_candidates": 3, "remaining_candidates": 2, "questions": 1, "converged": false, "termination_reason": "no_distinguishing_question"}
+{"case": "sort_numbers", "success": true, "total_candidates": 2, "remaining_candidates": 1, "questions": 1, "converged": true, "termination_reason": "single_candidate"}
+{"case": "common_elements", "success": true, "total_candidates": 2, "remaining_candidates": 1, "questions": 1, "converged": true, "termination_reason": "single_candidate"}

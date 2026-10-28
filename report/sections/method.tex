@@ -1,0 +1,143 @@
+\section{METHOD}\label{sec:method}
+
+This section details the theoretical architecture of SEMSYNTH as originally envisioned for robust human-in-the-loop program synthesis. We first articulate the complete 7-stage canonical framework, its 47-dimensional feature space, information gain formulation, Bayesian belief revision, and adaptive regeneration. Subsequently, we formalize the \textit{Implementation Scope} realized in our monitored engineering prototype, showing under explicit assumptions that our execution-based balanced partition scoring corresponds precisely to the deterministic limit-case of the canonical information gain metric.
+
+\subsection{Canonical Pipeline Overview}
+
+The complete SEMSYNTH framework operates as a structured, interactive 7-stage active learning pipeline:
+\begin{enumerate}
+    \item \textbf{Specification Parsing:} Extracts functional objectives, constraints, and interface types from natural language user prompts.
+    \item \textbf{Feature Extraction:} Constructs a dense 47-dimensional feature representation $\mathbf{x} \in \mathbb{R}^{47}$ encoding code syntax, execution dynamics, and natural language query properties.
+    \item \textbf{Hypothesis Initialization (AGA):} Generates a diverse initial candidate pool $\mathcal{H}_0$ through two-stage Autoregressively Generated Algorithms.
+    \item \textbf{Question Selection:} Ranks candidate clarification queries $q \in \mathcal{Q}$ by combining entropy-based semantic information gain $IG(q)$ with a diversity penalty.
+    \item \textbf{Oracle Interaction:} Presents the optimal clarification question $q^*$ to the user oracle, receiving a discrete feedback label $a \in \{\text{Yes}, \text{No}\}$.
+    \item \textbf{Belief Revision:} Updates posterior hypothesis probability weights $P(h \mid a, q)$ via contradiction-aware soft Bayesian belief updating.
+    \item \textbf{Termination and Adaptive Regeneration:} If belief mass concentrates on a dominant candidate, the system returns $h^*$; if contradictory feedback exhausts viable hypotheses, Reflexion-style adaptive regeneration is triggered.
+\end{enumerate}
+
+\subsection{47-Dimensional Features and Mapping \texorpdfstring{$M(h,q)$}{M(h,q)}}
+
+In the full architecture retained from the supplied manuscript~\cite{semsynthdesign}, predicting whether a candidate program $h$ satisfies a natural language clarification question $q$ without requiring exhaustive concrete execution on arbitrary domains is governed by a learned mapping function $M: \mathcal{H} \times \mathcal{Q} \to [0, 1]$, where $M(h, q) = P(h \models q)$. The model operates over a 47-dimensional feature vector $\mathbf{x}(h, q)$ composed of three structured groups:
+\begin{itemize}
+    \item \textbf{18 AST Structural Features:} Node count, maximum AST depth, branching factor, loop nesting levels, external function call count, cyclomatic complexity, distinct variable identifiers, operator vocabulary diversity, Halstead volume, recursion indicators, lambda expression frequency, list comprehension presence, exception handling coverage, external import count, control flow graph diameter, generator expression flags, assertion density, and docstring presence.
+    \item \textbf{18 Execution and Semantic Features:} Determinism score, commutativity flag, monotonicity, numerical boundedness, return type distribution, empirical runtime complexity class, I/O signature compatibility, side-effect detection, idempotency, boundary condition behavior (e.g., handling empty lists, None, or zero), error handling completeness, floating-point precision sensitivity, string encoding compliance, collection ordering invariance, in-place mutability, constraint template matching, output cardinality, and execution trace step count.
+    \item \textbf{11 Question-Text NLP Features:} Query token length, syntactic parse depth, lexical ambiguity score, question category classifier (boundary vs. algorithmic strategy vs. structural), token overlap with specification, verb presence, negation markers, conditional clauses, universal/existential quantifiers, domain keyword overlap, and IDF-weighted specificity.
+\end{itemize}
+
+The supplied design proposes an XGBoost mapping model~\cite{xgboost} trained on labeled code--question--answer triples. Its sub-millisecond inference objective is a design target reported in the reference, not a measurement of this prototype. No 47-feature model is trained or integrated in the evaluated course code.
+
+\subsection{Semantic Information Gain Pipeline}\label{sec:method:ig}
+
+Given an active hypothesis set $\mathcal{H}_t$ with posterior belief distribution $\{w_h^{(t)}\}_{h \in \mathcal{H}_t}$ (such that $\sum_h w_h^{(t)} = 1$), the prior Shannon entropy representing hypothesis uncertainty is:
+\begin{equation}
+    H(\mathcal{H}_t) = - \sum_{h \in \mathcal{H}_t} w_h^{(t)} \log_2 w_h^{(t)}.
+\end{equation}
+For a proposed clarification question $q$, the oracle's response is a binary random variable $A \in \{\text{Yes}, \text{No}\}$. The marginal probability of observing answer $a \in \{\text{Yes}, \text{No}\}$ is given by marginalizing over all candidate hypotheses:
+\begin{equation}
+    P(A = \text{Yes} \mid q) = \sum_{h \in \mathcal{H}_t} w_h^{(t)} M(h, q),
+\end{equation}
+with $P(A = \text{No} \mid q) = 1 - P(A = \text{Yes} \mid q)$. Conditioned on receiving answer $a$, the posterior entropy of the hypothesis space is:
+\begin{equation}
+    H(\mathcal{H}_t \mid A = a) = - \sum_{h \in \mathcal{H}_t} P(h \mid a, q) \log_2 P(h \mid a, q).
+\end{equation}
+The expected \textbf{Semantic Information Gain} $IG(q)$ is defined as the mutual information between the hypothesis identity and the query outcome:
+\begin{equation}\label{eq:ig_canonical}
+    IG(q) = H(\mathcal{H}_t) - \sum_{a \in \{\text{Yes}, \text{No}\}} P(A = a \mid q) H(\mathcal{H}_t \mid A = a).
+\end{equation}
+
+\subsubsection{Atomic Questions and Template Library}
+The original design decomposes compound or disjunctive questions into single-proposition Yes/No queries. It describes 85 concrete templates in nine clusters: boundary, strategy, data types, I/O, higher-order operations, strings, mathematics, collection indexing (ten each), and domain-specific algorithms (five). This library and its natural-language decomposition are not integrated in the evaluated prototype. Two short semantic wording templates exist in the UI, with an I/O fallback; the primary experiment uses I/O questions only.
+
+\subsubsection{Question Diversity Regularization}
+To prevent asking repetitive questions probing the same semantic aspect, SEMSYNTH penalizes queries that overlap lexically or semantically with prior history $\mathcal{Q}_{\text{history}} = \{q_1, \dots, q_{t-1}\}$:
+\begin{equation}\label{eq:ig_final}
+    IG_{\text{final}}(q) = IG(q) - \lambda \max_{q' \in \mathcal{Q}_{\text{history}}} \text{Sim}_{\text{Jaccard}}(q, q'),
+\end{equation}
+The reference uses $\lambda=0.5$ and excludes similarity above 0.85; these are retained design settings, not measured prototype parameters. Here $\text{Sim}_{\text{Jaccard}}(q, q') = \frac{|T(q) \cap T(q')|}{|T(q) \cup T(q')|}$ computes token-level set similarity and $\lambda > 0$ is a tunable diversity hyperparameter.
+
+\subsection{Contradiction-Aware Bayesian Belief Revision}\label{sec:method:belief}
+
+Upon receiving oracle response $a_t$ for query $q_t$, the system updates the belief weight of each hypothesis $h \in \mathcal{H}_t$ via Bayes' theorem:
+\begin{equation}\label{eq:bayes_update}
+    w_h^{(t+1)} = \frac{w_h^{(t)} P(a_t \mid h, q_t)}{\sum_{h' \in \mathcal{H}_t} w_{h'}^{(t)} P(a_t \mid h', q_t)}.
+\end{equation}
+In a noisy setting where the user may inadvertently give incorrect answers with probability $\epsilon \in (0, 0.5)$, the observation likelihood is smoothed symmetrically:
+\begin{equation}
+    P(a_t = \text{Yes} \mid h, q_t) = (1 - \epsilon) M(h, q_t) + \epsilon (1 - M(h, q_t)).
+\end{equation}
+
+\subsubsection{Consistency under Contradictions}
+The original design scores historical agreement as
+\begin{equation}
+ s_h=\frac{1}{t}\sum_{i=1}^{t}\mathbb{I}[M(h,q_i)=a_i].
+\end{equation}
+Candidates below a consistency threshold (0.5 in the reference design) receive dampened weights instead of immediate elimination. This mechanism is intended to support recovery from conflicting feedback. Optional symmetric-noise updates in the prototype do not constitute the full consistency/recovery engine, and no noisy-feedback result is reported here.
+
+\subsection{Tiered Hypothesis Management}\label{sec:method:tiered}
+The original design first keeps a beam of top-$K$ hypotheses by belief weight (design beam $K=50$), and uses program-length buckets as a lightweight clustering proxy when the space is large. One representative per bucket is considered to reduce repeated work. With $m$ representatives and a fixed question set, the intended scoring cost is $O(|\mathcal Q|(K+m))$, apart from feature, model, and execution costs. Length buckets are not AST tree-edit-distance clustering. The target space of up to $10^5$ hypotheses belongs to the full design; this project measures pools of at most three and makes no scale or query-latency claim.
+
+\subsection{Autoregressively Generated Algorithms and Regeneration}\label{sec:method:aga}
+AGA has two original steps: generate structurally different algorithmic strategies from the specification, then translate each strategy independently to code. The six domain hints in the supplied design are \texttt{sieve}, \texttt{dp\_triangle}, \texttt{matrix\_transpose}, \texttt{geometry}, \texttt{number\_theory}, and \texttt{two\_pointer}. Repeated direct code-generation calls in the prototype do not implement this strategy--code separation. SYNTRA~\cite{syntra} provides related active synthesis context, without serving as an implemented baseline here.
+
+The design's feedback-conditioned regeneration is inspired by Reflexion~\cite{reflexion}. Its proposed trigger is
+\begin{equation}
+ \mathrm{degenerate}\iff\max_h w_h<\epsilon_d\quad\mathrm{or}\quad n_{\mathrm{consecutive\ No}}\geq3,
+\end{equation}
+with design threshold $\epsilon_d=0.05$, distinct from the oracle-noise parameter. The interaction history supplies \texttt{MUST-SATISFY} and \texttt{MUST-AVOID} constraints. Newly generated candidates are merged with boosted initial weights (0.3 in the design) and renormalized. These trigger and weighting choices are retained as design parameters, not tested settings of the current hard-filtering loop. The prototype stops with an empty, converged, or tentative result rather than invoking regeneration.
+
+\subsection{Theoretical Query Complexity}
+
+\begin{theorem}[Logarithmic Query Complexity]\label{thm:query_bound}
+Assume the intended hypothesis is in the initial pool, feedback and mapping are exact, and every non-singleton active set admits a question whose two parts each contain at most $\lceil |\mathcal H_t|/2\rceil$ candidates. Then hard filtering isolates the intended hypothesis within $\lceil\log_2|\mathcal H_0|\rceil$ questions.
+\end{theorem}
+\begin{proof}
+After $T$ answers, the balanced-split assumption gives
+$|\mathcal H_T|\leq\lceil|\mathcal H_0|/2^T\rceil$.
+For $T=\lceil\log_2|\mathcal H_0|\rceil$, the bound is one. This is conditional on a distinguishing balanced question remaining available at every step; a bounded probe generator need not satisfy that assumption.
+\end{proof}
+
+\subsection{Implementation Scope of the Prototype}\label{sec:method:scope}
+
+The course implementation demonstrates active selection on a bounded pool and records its limits. Table~\ref{tab:implementation_scope} provides a comprehensive alignment matrix mapping each component of the canonical SEMSYNTH design to its status in our executable codebase.
+
+\input{tables/implementation_scope}
+
+\subsubsection{Mathematical Derivation of the Prototype Limit-Case}
+Under uniform priors and deterministic observations, the prototype score is a special case of the original Information Gain equation (Eq.~\ref{eq:ig_canonical}).
+
+Consider a pool of $K$ candidate programs $\mathcal{H} = \{h_1, \dots, h_K\}$ evaluated over a probe input $x \in \mathcal{X}_{\text{probe}}$. Let candidate $h_i(x)$ produce observation $y_i$. Suppose we formulate a clarification query $q$: \textit{``On input $x$, is the output equal to $y$?''}.
+
+Under the prototype's operational assumptions:
+\begin{enumerate}
+    \item \textbf{Deterministic Semantic Mapping:} The mapping $M(h_i, q) \in \{0, 1\}$ is deterministic, evaluated directly via isolated execution:
+    \begin{equation}
+        M(h_i, q) = \mathbb{I}[h_i(x) == y].
+    \end{equation}
+    \item \textbf{Uniform Prior Belief:} Prior to questioning at step $t$, remaining active hypotheses hold equal weight $w_h = \frac{1}{|\mathcal{H}|}$.
+    \item \textbf{Binary Partitioning:} The query induces a binary partition of the active set into $\mathcal{H}_{\text{yes}} = \{h \in \mathcal{H} \mid h(x) == y\}$ and $\mathcal{H}_{\text{no}} = \mathcal{H} \setminus \mathcal{H}_{\text{yes}}$.
+\end{enumerate}
+
+Let $p = \frac{|\mathcal{H}_{\text{yes}}|}{|\mathcal{H}|}$ denote the fraction of hypotheses responding positively, and $1 - p = \frac{|\mathcal{H}_{\text{no}}|}{|\mathcal{H}|}$. Under uniform priors, the marginal observation probabilities are:
+\begin{equation}
+    P(A = \text{Yes} \mid q) = p, \quad P(A = \text{No} \mid q) = 1 - p.
+\end{equation}
+When the oracle answers $A = \text{Yes}$, all hypotheses in $\mathcal{H}_{\text{no}}$ are filtered out, leaving $|\mathcal{H}_{\text{yes}}|$ equally likely candidates. Hence, the conditional entropy becomes:
+\begin{equation}
+    H(\mathcal{H} \mid A = \text{Yes}) = \log_2 |\mathcal{H}_{\text{yes}}| = \log_2 (p \cdot |\mathcal{H}|).
+\end{equation}
+Similarly, when $A = \text{No}$:
+\begin{equation}
+    H(\mathcal{H} \mid A = \text{No}) = \log_2 |\mathcal{H}_{\text{no}}| = \log_2 ((1 - p) \cdot |\mathcal{H}|).
+\end{equation}
+Substituting these into the canonical Information Gain equation (Eq.~\ref{eq:ig_canonical}) with prior entropy $H(\mathcal{H}) = \log_2 |\mathcal{H}|$:
+\begin{align}
+ IG(q)&=\log_2 n-p\log_2(pn)\nonumber\\
+      &\quad -(1-p)\log_2((1-p)n)\nonumber\\
+      &=-p\log_2p-(1-p)\log_2(1-p)=H_b(p),
+\end{align}
+where $n=|\mathcal H|$ and $H_b(p)$ is binary entropy. Only nonempty partitions are considered.
+
+\begin{theorem}[Equivalence of Information Gain and Partition Balance]
+Under uniform hypothesis priors and deterministic probe execution, maximizing Semantic Information Gain $IG(q)$ over the active hypothesis space is algebraically equivalent to maximizing the binary entropy $H_b(p)$ of the induced behavioral partition, attaining its global maximum at an exact 50-50 bisection ($p = 0.5$).
+\end{theorem}
+Consequently, the \texttt{balanced} selector's binary score implements this special-case objective on the available probe partitions; it does not implement learned semantic mapping or diversity regularization. Furthermore, hard filtering represents the exact limiting case of Bayesian updating (Eq.~\ref{eq:bayes_update}) as the oracle noise parameter $\epsilon \to 0$.

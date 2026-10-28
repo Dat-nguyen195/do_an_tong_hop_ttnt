@@ -1,0 +1,134 @@
+{
+  "dataset_sha256": "6f91b5f7ab022418b153b4d580fac9012ebd0147bd0c638d63ee7c2e53de2e75",
+  "api_calls_made": 0,
+  "live_generation_reexecuted": false,
+  "scope": "Re-execution of saved pools, selection, oracle responses and evaluation; excludes original live API provenance and timing.",
+  "runs": [
+    {
+      "path": "results/integration_review/e6a84cf2098af752",
+      "run_id": "e6a84cf2098af752",
+      "mode_as_recorded": "offline",
+      "provider_as_recorded": "offline",
+      "model_as_recorded": "fixed",
+      "tasks": 32,
+      "verified_task_method_records": 96,
+      "balanced_termination": {
+        "single_candidate": 29,
+        "no_distinguishing_question": 3
+      },
+      "balanced_questions": 47,
+      "candidate_counts": {
+        "3": 32
+      }
+    },
+    {
+      "path": "results/real_pilot_gemini/8be202264a584167",
+      "run_id": "8be202264a584167",
+      "mode_as_recorded": "real",
+      "provider_as_recorded": "gemini",
+      "model_as_recorded": "gemini-3.5-flash-lite",
+      "tasks": 8,
+      "verified_task_method_records": 24,
+      "balanced_termination": {
+        "no_distinguishing_question": 6,
+        "single_candidate": 2
+      },
+      "balanced_questions": 2,
+      "candidate_counts": {
+        "3": 6,
+        "2": 2
+      }
+    },
+    {
+      "path": "results/real_pilot_qwen/b6c988199ed7b1d5",
+      "run_id": "b6c988199ed7b1d5",
+      "mode_as_recorded": "real",
+      "provider_as_recorded": "openai",
+      "model_as_recorded": "qwen2.5-coder:32b",
+      "tasks": 8,
+      "verified_task_method_records": 24,
+      "balanced_termination": {
+        "single_candidate": 3,
+        "no_distinguishing_question": 5
+      },
+      "balanced_questions": 4,
+      "candidate_counts": {
+        "2": 3,
+        "3": 5
+      }
+    },
+    {
+      "path": "results/real_smoke_gemini/9f1cfb5a56e801ba",
+      "run_id": "9f1cfb5a56e801ba",
+      "mode_as_recorded": "real",
+      "provider_as_recorded": "gemini",
+      "model_as_recorded": "gemini-3.5-flash-lite",
+      "tasks": 1,
+      "verified_task_method_records": 3,
+      "balanced_termination": {
+        "no_distinguishing_question": 1
+      },
+      "balanced_questions": 0,
+      "candidate_counts": {
+        "3": 1
+      }
+    },
+    {
+      "path": "results/real_smoke_qwen/b8ce2c2d60f0c346",
+      "run_id": "b8ce2c2d60f0c346",
+      "mode_as_recorded": "real",
+      "provider_as_recorded": "openai",
+      "model_as_recorded": "qwen2.5-coder:32b",
+      "tasks": 1,
+      "verified_task_method_records": 3,
+      "balanced_termination": {
+        "single_candidate": 1
+      },
+      "balanced_questions": 1,
+      "candidate_counts": {
+        "2": 1
+      }
+    }
+  ],
+  "total_verified_records": 150,
+  "case_studies": [
+    {
+      "run_id": "b6c988199ed7b1d5",
+      "task_id": "SYN_DEDUP_01",
+      "codes": [
+        "def remove_duplicates(xs):\n    return list(set(xs))",
+        "def remove_duplicates(xs):\n    seen = set()\n    result = []\n    for item in xs:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result"
+      ],
+      "selected_code": "def remove_duplicates(xs):\n    seen = set()\n    result = []\n    for item in xs:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result",
+      "transcript": [
+        {
+          "question": "For input {'xs': [4, 1, 4, 2, 1]}, should the function return [1, 2, 4]?",
+          "question_type": "io",
+          "answer": false,
+          "test_input": {
+            "xs": [
+              4,
+              1,
+              4,
+              2,
+              1
+            ]
+          },
+          "yes_candidate_ids": [
+            0
+          ],
+          "no_candidate_ids": [
+            1
+          ],
+          "info_gain": 1.0,
+          "balance": 1.0,
+          "candidates_before": 2,
+          "removed": 1,
+          "candidates_after": 1,
+          "posterior_max": null
+        }
+      ],
+      "termination_reason": "single_candidate"
+    }
+  ]
+}

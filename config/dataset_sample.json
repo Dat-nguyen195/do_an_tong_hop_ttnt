@@ -59,7 +59,13 @@
         "answer": true,
         "explanation": "Two elements are 'close' if their absolute difference is strictly less than the threshold."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "HumanEval/0",
+      "source_url": "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "HE_002",
@@ -100,7 +106,13 @@
         "answer": true,
         "explanation": "Standard space-delimited format with no extra whitespace."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "HumanEval/15",
+      "source_url": "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "HE_003",
@@ -149,7 +161,13 @@
         "answer": true,
         "explanation": "Empty list input should produce empty string output."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "HumanEval/28",
+      "source_url": "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "HE_004",
@@ -196,7 +214,13 @@
         "answer": false,
         "explanation": "The empty string is NOT included; the shortest prefix has length 1."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "HumanEval/14",
+      "source_url": "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "HE_005",
@@ -265,7 +289,13 @@
         "answer": true,
         "explanation": "Two zeros at different positions sum to zero, so yes."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "HumanEval/43",
+      "source_url": "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "HE_006",
@@ -309,7 +339,13 @@
         "answer": true,
         "explanation": "'A' and 'a' are treated as different characters."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "HumanEval/54",
+      "source_url": "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "HE_007",
@@ -392,7 +428,13 @@
         "answer": true,
         "explanation": "The output list must be sorted in ascending order."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "HumanEval/58",
+      "source_url": "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "HE_008",
@@ -453,12 +495,18 @@
         "answer": true,
         "explanation": "The derivative of a constant polynomial is 0, represented as an empty list."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "HumanEval/62",
+      "source_url": "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "MB_001",
     "source": "MBPP",
-    "source_id": "MBPP/1",
+    "source_id": "MBPP/2",
     "domain": "list",
     "title": "Similar Elements",
     "description": "Write a function to find the common elements from the given two tuple lists.",
@@ -536,7 +584,14 @@
         "answer": true,
         "explanation": "We only care about the unique intersection."
       }
-    ]
+    ],
+    "legacy_source_id": "MBPP/1",
+    "provenance": {
+      "audited_source_id": "MBPP/2",
+      "source_url": "https://raw.githubusercontent.com/google-research/google-research/master/mbpp/mbpp.jsonl",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored. Legacy ID MBPP/1 corrected to MBPP/2. Tuple inputs/outputs represented as JSON lists; local ordering expectations retained."
+    }
   },
   {
     "id": "MB_002",
@@ -607,7 +662,13 @@
         "answer": true,
         "explanation": "All elements are squared regardless of sign."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "MBPP/8",
+      "source_url": "https://raw.githubusercontent.com/google-research/google-research/master/mbpp/mbpp.jsonl",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "MB_003",
@@ -651,12 +712,18 @@
         "answer": true,
         "explanation": "Character matching is case-sensitive: 'P' and 'p' are different."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "MBPP/11",
+      "source_url": "https://raw.githubusercontent.com/google-research/google-research/master/mbpp/mbpp.jsonl",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored. Removes BOTH first and last occurrences; a single occurrence is removed once."
+    }
   },
   {
     "id": "MB_004",
     "source": "MBPP",
-    "source_id": "MBPP/56",
+    "source_id": "MBPP/91",
     "domain": "string",
     "title": "Check Substring",
     "description": "Write a function to check if a substring is present in a given list of string values.",
@@ -710,7 +777,14 @@
         "answer": true,
         "explanation": "Default string matching in Python is case-sensitive."
       }
-    ]
+    ],
+    "legacy_source_id": "MBPP/56",
+    "provenance": {
+      "audited_source_id": "MBPP/91",
+      "source_url": "https://raw.githubusercontent.com/google-research/google-research/master/mbpp/mbpp.jsonl",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored. Legacy ID MBPP/56 corrected to MBPP/91. Local parameter string_list corresponds positionally to upstream str1."
+    }
   },
   {
     "id": "MB_005",
@@ -766,12 +840,18 @@
         "answer": true,
         "explanation": "The function is expected to receive at least one element."
       }
-    ]
+    ],
+    "provenance": {
+      "audited_source_id": "MBPP/62",
+      "source_url": "https://raw.githubusercontent.com/google-research/google-research/master/mbpp/mbpp.jsonl",
+      "audit_status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "contract_notes": "Local tests are a reduced/adapted suite; clarification questions are project-authored."
+    }
   },
   {
     "id": "MB_006",
-    "source": "MBPP",
-    "source_id": "MBPP/105",
+    "source": "Self-authored",
+    "source_id": "LOCAL/count_upper",
     "domain": "string",
     "title": "Count Uppercase Characters",
     "description": "Write a function to count the number of uppercase characters in a string.",
@@ -807,12 +887,19 @@
         "answer": true,
         "explanation": "An empty string has no uppercase characters."
       }
-    ]
+    ],
+    "legacy_source_id": "MBPP/105",
+    "provenance": {
+      "audited_source_id": "NONE_VERIFIED",
+      "source_url": "https://raw.githubusercontent.com/google-research/google-research/master/mbpp/mbpp.jsonl",
+      "audit_status": "LOCAL_CONTRACT_ONLY",
+      "contract_notes": "Legacy MBPP/105 counts Boolean True values. No upstream source verified for this ASCII-uppercase task; self-authored local contract."
+    }
   },
   {
     "id": "MB_007",
-    "source": "MBPP",
-    "source_id": "MBPP/119",
+    "source": "MBPP-adapted",
+    "source_id": "MBPP/534",
     "domain": "string",
     "title": "Search Literal in String",
     "description": "Write a function to search for a literal string within another string and return the start position of the first match.",
@@ -851,6 +938,13 @@
         "answer": true,
         "explanation": "Returning -1 is the standard convention for 'not found'."
       }
-    ]
+    ],
+    "legacy_source_id": "MBPP/119",
+    "provenance": {
+      "audited_source_id": "ADAPTED_FROM_MBPP/534",
+      "source_url": "https://raw.githubusercontent.com/google-research/google-research/master/mbpp/mbpp.jsonl",
+      "audit_status": "ADAPTED_CONTRACT_ONLY",
+      "contract_notes": "Adapted from MBPP/534: original regex search returns (start,end); local literal search returns start index or -1. Not a canonical benchmark result."
+    }
   }
 ]

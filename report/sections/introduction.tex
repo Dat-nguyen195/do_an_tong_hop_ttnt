@@ -1,0 +1,20 @@
+\section{INTRODUCTION}
+Program synthesis seeks executable programs from high-level specifications. A short description can leave output order, duplicate treatment, boundary inclusion, or case sensitivity unspecified. For example, ``remove duplicates from a list'' is compatible with preserving first occurrences or returning sorted unique values. Syntax checks cannot resolve this difference because both programs may be valid Python.
+
+\subsection{The Cognitive Friction Problem}
+The supplied SEMSYNTH design~\cite{semsynthdesign} frames this tension as a \textit{Cognitive Friction Gap}. Concrete input-output (I/O) examples can constrain behavior, but a user must identify an informative input and supply its intended output. High-level Yes/No questions may offer another interaction format. Their effect on effort remains an empirical question: understanding a binary question can still require substantial reasoning. This project does not include a user study.
+
+Consider ``extract the domain from an email address.'' For a multilevel address, retaining the full subdomain and retaining only a registrable domain express different intentions. A clarification about subdomain treatment would make this choice explicit. This is a motivating example from the design, rather than an evaluated capability of the current string/list prototype.
+
+\subsection{Semantic Active Learning and Challenges}
+SEMSYNTH treats clarification as active learning over candidate programs. Its design selects questions expected to reduce uncertainty, updates beliefs from answers, and regenerates candidates when refinement is insufficient. The three original challenges remain: predicting how programs satisfy semantic questions; handling noisy or contradictory feedback; and managing large candidate spaces. The full design addresses them with a learned mapping model, belief revision, and tiered management. The implementation evaluated here addresses only the small-pool, deterministic-observation part.
+
+\subsection{Related Work}
+FlashFill~\cite{flashfill} demonstrates synthesis from examples with interactive disambiguation. TiCoder~\cite{ticoder} obtains feedback on generated tests to prune or rank code suggestions. ClarifyGPT~\cite{clarifygpt} checks behavioral consistency, asks targeted questions when requirements are ambiguous, and refines the requirement before final generation. These systems motivate execution-grounded clarification, but their published performance is not used as a baseline in our experiments.
+
+SYNTRA~\cite{syntra} studies test-time transduction and active elimination using predicted outputs. Reflexion~\cite{reflexion} uses linguistic feedback across trials and motivates the regeneration component in the supplied design. ClarifyCodeBench~\cite{clarifycodebench} studies requirement clarification as an evaluation task. Our project does not reproduce these systems or their benchmarks; it evaluates three selectors on shared saved pools.
+
+\subsection{Project Scope and Contributions}
+The project contributes an executable subset of the supplied SEMSYNTH design, an explicit design-to-code alignment, a controlled selection experiment, and a reproducible evidence package. It preserves the original method's 47-feature mapping, semantic information gain, atomic questions, diversity, Bayesian revision, AGA, and regeneration as the intended architecture. It does not claim these unintegrated modules as completed implementations or new research contributions.
+
+The measured prototype executes bounded probes to obtain deterministic output partitions instead of training the 47-feature model. It implements hard filtering, records stopping reasons, and exposes the interaction through Streamlit. Optional soft updates exist in code but are outside the primary experiment. Section~\ref{sec:method} retains the complete method and identifies this subset; Sections~\ref{sec:setup} and~\ref{sec:results} describe its measured behavior; Section~\ref{sec:discussion} discusses cases, validity, and the remaining architecture.

@@ -1,0 +1,25 @@
+\section{RESULTS}\label{sec:results}
+\subsection{Controlled Offline Selection (RQ1)}
+Table~\ref{tab:offline_results} reports the 32-case controlled run. Direct-1 and First-valid each pass 13 cases (40.625\%); Balanced passes 32 (100\% of the retained finite test suites). The observed difference is 19 cases, or 59.375 \emph{percentage points}. On individual retained inputs, the noninteractive selectors pass 71/127 and Balanced passes 127/127. The case-level result remains primary.
+\input{tables/offline_results}
+
+Both noninteractive rows are identical because admission checks cannot resolve the intended interpretation among these admissible programs. The first-entry baseline uses shuffled hand-authored code, not an observed LLM output distribution. Its failure fraction therefore does not estimate a language model's generation error rate.
+
+Family-level results are descriptive: Direct-1 passes 3/4 in case conversion and trimming, 2/4 in duplicate removal and palindrome checking, 1/4 in intersection, parity, and sorting, and 0/4 in threshold filtering. Balanced passes 4/4 in each family. Four correlated cases per family are insufficient for a general domain-difficulty ranking or a statistical superiority claim.
+
+\subsection{Questions and Termination (RQ2)}
+Balanced asks 47 questions in total, averaging 1.4688 per case: 17 cases use one question and 15 use two. No case reaches the three-question limit. This is compatible with small informative partitions, but it does not verify the assumptions of Theorem~\ref{thm:query_bound}. The theorem requires distinguishability throughout refinement; it does not guarantee a useful question within every bounded probe set.
+\input{tables/stopping_reasons}
+
+Twenty-nine offline sessions finish with one active candidate. Three stop with \texttt{no\_distinguishing\_question}; their chosen programs still pass the retained tests. These programs are indistinguishable on the available probes, not proven equivalent on all valid inputs. The interface must retain the tentative status rather than treat test success as universal correctness.
+
+\subsection{Saved LLM Pilot Pools (RQ3)}
+Table~\ref{tab:real_llm_results} reports eight synthetic cases per recorded backend. For the Gemini-labeled run, Direct-1 and First-valid pass 7/8 while Balanced passes 8/8, an observed difference of one case (12.5 percentage points). For the Qwen-labeled run, the corresponding results are 6/8 and 8/8, a difference of two cases (25 percentage points). Mean question counts are 0.25 and 0.50.
+\input{tables/real_llm_results}
+
+The baseline failures in these saved runs occur on parity for Gemini and on duplicate removal and parity for Qwen. Balanced selects a passing alternative already present in each pool. It does not repair source code or generate a missing correct candidate. Low question counts partly reflect limited observable diversity: six Gemini sessions and five Qwen sessions stop without a distinguishing question. Only two and three sessions respectively converge to one candidate (Table~\ref{tab:stopping_reasons}).
+
+All pilot selections pass their retained tests, including unresolved sessions. With eight related cases, one ordering/seed, noiseless feedback, and no model-generation replication, these observations support a small feasibility demonstration. They do not establish performance on independent tasks, superiority to published interactive systems, noise tolerance, or human cognitive benefits.
+
+\subsection{Evidence Consistency}
+The saved artifacts contain 96 offline task-method outcomes, 24 for each pilot, and three for each of two smoke runs. Replay recomputes all 150 outcomes from saved pools and checks pass counts, selected-code hashes, question counts, candidate counts, excluded inputs, and stopping states. Timing fields are deliberately not compared because platform and load vary. The same outputs validate the numerical tables; replay does not independently authenticate historical provider responses.

@@ -1,0 +1,150 @@
+{
+  "checked_on": "2026-10-28",
+  "sources": {
+    "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+    "https://raw.githubusercontent.com/google-research/google-research/master/mbpp/mbpp.jsonl": "ccf64ceae9c5403bf50a044cb6d505bfd2a2963ee58338ba268fd65beab92a9f",
+    "https://huggingface.co/datasets/google-research-datasets/mbpp/raw/main/README.md": "6377d5c76ba46b9e650daa6d5eb592e671c9b15586e39f23f50ed9bf2ac54cf6"
+  },
+  "pilot_dataset_sha256": "5f89be7a96b726ea5ec0e23f23ee3f4b9edf2a1fd5a921cd508d445e536b948f",
+  "task_count": 15,
+  "source_matched_tasks": 13,
+  "adapted_or_local_contract_tasks": 2,
+  "local_tests_passed": 46,
+  "tasks": [
+    {
+      "task_id": "HE_001",
+      "verified_source_id": "HumanEval/0",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "a2f3916fadd61edd1154514c883dda4255115ec7570c7077e130851274ffc7b4",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "HE_002",
+      "verified_source_id": "HumanEval/15",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "5994f766e4a97c42ff97f1891a2104f002bc7d80458e0692189093467bb6e200",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "HE_003",
+      "verified_source_id": "HumanEval/28",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "7679f183c21be652e4d85b66a5fa5215a9b119be3dfd16525e1fb44078349dc8",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "HE_004",
+      "verified_source_id": "HumanEval/14",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "566bb1f3a68a58b9acffe5b0f7faba6080c47fe2a9df1d341c6a5d272c613f0e",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "HE_005",
+      "verified_source_id": "HumanEval/43",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 4,
+      "local_tests": 4,
+      "reference_sha256": "ea0344d0ac438d2b8ac83170fdd534138b6b5a06f20995431d910a2575212164",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "HE_006",
+      "verified_source_id": "HumanEval/54",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "749c3b5836bab0722b2e5a127e935ffa27d80bf1b36dc4d8dd09e56222f91619",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "HE_007",
+      "verified_source_id": "HumanEval/58",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "7877779332392b164d58d6fcb8cd2084b5b1fc7bff0ad28d23ef5281296bffb2",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "HE_008",
+      "verified_source_id": "HumanEval/62",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "0914023278f2dfa9b1b4cb9a19abcb8b6bee618c25c2b1d80fe3b073738e8c1f",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "MB_001",
+      "verified_source_id": "MBPP/2",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "6e953d979af995004e9f28eb42b6602fc062a6736018f2092a224b7346cc0555",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "MB_002",
+      "verified_source_id": "MBPP/8",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "b301bf099cc37dfd81cde2155db060b28cc9436d9238a3cda1b39bc8c3d8ee6c",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "MB_003",
+      "verified_source_id": "MBPP/11",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "51a72c18987588384928aed3b93b3d4d87fac4b1905780471f7d673d04b779d3",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "MB_004",
+      "verified_source_id": "MBPP/91",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "bf4900c7da3e13fd4817bd7ffd27035203052f8f04394fa31fdf500f129b6d22",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "MB_005",
+      "verified_source_id": "MBPP/62",
+      "status": "SOURCE_AND_LOCAL_TESTS_VERIFIED",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "96a71867421a3c97a10e68ee4fef1844fb498fa24d556a29cb855833ddf1ec4a",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "MB_006",
+      "verified_source_id": "NONE_VERIFIED",
+      "status": "LOCAL_CONTRACT_ONLY",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "8f672a0c417d46a970c06de7529e14ef5ca15a8ec441d595e4dfd4f0cab81bec",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    },
+    {
+      "task_id": "MB_007",
+      "verified_source_id": "ADAPTED_FROM_MBPP/534",
+      "status": "ADAPTED_CONTRACT_ONLY",
+      "local_tests_passed": 3,
+      "local_tests": 3,
+      "reference_sha256": "d6a2eaa006d55c756c5f770523a923fff4558ff5506d157a9a6dd74aef51bda8",
+      "normalization": "typing imports/annotations removed; local argument names mapped by position; JSON normalizes tuples to lists"
+    }
+  ]
+}
