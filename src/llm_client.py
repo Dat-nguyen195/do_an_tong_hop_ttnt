@@ -294,3 +294,7 @@ class MockLLMClient:
         while len(out) < k:
             out.extend(variants)
         return out[:k]
+
+# SEMSYNTH V6: isolated Kaggle provider adapter; original prompts remain unchanged.
+from .semsynth_kaggle_provider import install as _install_semsynth_v6
+SUPPORTED_PROVIDERS = _install_semsynth_v6(LLMClient, PROVIDER_CONFIG, SUPPORTED_PROVIDERS)
