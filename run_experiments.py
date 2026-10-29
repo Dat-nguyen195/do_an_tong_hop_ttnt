@@ -90,17 +90,42 @@ def task_pool(task: dict, args, root: Path) -> list[str]:
         if saved.get('task_id') == task['id'] and saved.get('run_id') == root.name:
             return saved['codes']
         raise RuntimeError(f'Candidate pool cache mismatch: {path}')
+    prompt_hash = None
     if args.mode == 'offline':
         codes = list(task['candidate_codes'])
         random.Random(f'{args.seed}:{task["id"]}').shuffle(codes)
         codes = codes[:args.top_k]
     else:
-        llm = LLMClient(provider=args.provider, model=args.model)
-        if not llm.is_configured:
-            raise ValueError(f'Missing API key for {args.provider}; enter it in the Kaggle notebook or set the environment variable')
-        codes = llm.generate_multiple(task['description'], task['function_name'], task['params'], k=args.top_k)
+        # All four target interpretations in each family have exactly the same
+        # programming prompt. Generate the candidate pool ONCE per distinct
+        # prompt, then test all target interpretations against that frozen pool.
+        # This is an explicitly versioned protocol, not a silent checkpoint reuse.
+        shared_path = None
+        if args.share_identical_prompts:
+            prompt_hash = hashlib.sha256(json_text([
+                task['description'], task['function_name'], task['params']
+            ]).encode('utf-8')).hexdigest()
+            shared_path = root / 'shared_prompt_pools' / f'{prompt_hash}.json'
+        if shared_path is not None and shared_path.is_file() and args.resume:
+            shared = json.loads(shared_path.read_text(encoding='utf-8'))
+            if shared.get('run_id') != root.name or shared.get('prompt_sha256') != prompt_hash:
+                raise RuntimeError(f'Shared pool provenance mismatch: {shared_path}')
+            codes = shared['codes']
+        else:
+            llm = LLMClient(provider=args.provider, model=args.model)
+            if not llm.is_configured:
+                raise ValueError(f'Missing API key for {args.provider}; set its environment variable')
+            codes = llm.generate_multiple(task['description'], task['function_name'], task['params'], k=args.top_k)
+            codes = list(dict.fromkeys(c.strip() for c in codes if c and c.strip()))
+            if shared_path is not None:
+                atomic_json(shared_path, {'run_id': root.name,
+                        'prompt_sha256': prompt_hash, 'codes': codes,
+                        'provider': args.provider, 'model': args.model})
     codes = list(dict.fromkeys(c.strip() for c in codes if c and c.strip()))
+    if args.mode == 'real' and not codes:
+        print(f'  WARNING {task["id"]}: model generated zero usable code candidates', flush=True)
     atomic_json(path, {'run_id': root.name, 'task_id': task['id'], 'codes': codes,
+                       'prompt_sha256': prompt_hash,
                        'provider': args.provider if args.mode == 'real' else 'offline-bank',
                        'model': args.model if args.mode == 'real' else 'synthetic-fixed'})
     return codes
@@ -272,9 +297,11 @@ def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--mode', choices=['offline','real'], default='offline')
     p.add_argument('--dataset',type=Path,default=DEFAULT_DATASET)
-    p.add_argument('--provider',choices=['gemini','openai','openrouter'],default='gemini')
+    p.add_argument('--provider',choices=['gemini','openai','openrouter','local'],default='gemini')
     p.add_argument('--model',default=None)
     p.add_argument('--methods',default=','.join(METHODS))
+    p.add_argument('--share-identical-prompts',action='store_true',
+                   help='Use one LLM candidate pool for repeated identical task prompts')
     p.add_argument('--quick',action='store_true',help='One case per family (8 tasks)')
     p.add_argument('--max-tasks',type=int,default=None)
     p.add_argument('--seed',type=int,default=3101)
@@ -302,7 +329,7 @@ def main(argv=None):
     if not 0<=args.simulated_flip_rate<=1:
         p.error('--simulated-flip-rate must be in [0,1]')
     if args.mode == 'real' and not args.aggregate_only:
-        key={'gemini':'GEMINI_API_KEY','openai':'OPENAI_API_KEY','openrouter':'OPENROUTER_API_KEY'}[args.provider]
+        key={'gemini':'GEMINI_API_KEY','openai':'OPENAI_API_KEY','openrouter':'OPENROUTER_API_KEY','local':'SEMSYNTH_LOCAL_ENABLED'}[args.provider]
         if not os.environ.get(key):
             p.error(f'Missing {key}: manually enter the key in your Kaggle cell (or set the environment variable)')
     tasks = validate_dataset(json.loads(args.dataset.read_text(encoding='utf-8')))
@@ -323,6 +350,10 @@ def main(argv=None):
               'timeout':args.timeout,'answer_error_rate':args.answer_error_rate,
               'posterior_threshold':args.posterior_threshold,
               'simulated_flip_rate':args.simulated_flip_rate,'cache':args.cache}
+    if args.mode == 'real' and args.share_identical_prompts:
+        settings['candidate_pool_protocol'] = 'v6-one-pool-per-identical-prompt'
+    if args.mode == 'real' and args.provider == 'local':
+        settings['generation_profile'] = os.getenv('SEMSYNTH_GEN_PROFILE', 'v6-mask-local-512')
     run_id=sha(settings)
     output=args.output_dir/run_id;output.mkdir(parents=True,exist_ok=True)
     manifest=output/'manifest.json'
